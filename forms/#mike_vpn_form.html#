@@ -1,0 +1,182 @@
+ia="screen" />
+
+<link rel="stylesheet" type="text/css" href="css/ajaxtabs.css" />
+
+<script src='javascript/mootools-yui-compressed.js' type='text/javascript'></script> 
+
+<script src='javascript/flext-uncompressed.js' type='text/javascript' ></script>
+
+<script src='javascript/ajaxtabs.js' type='text/javascript'>
+
+/***********************************************
+
+* Ajax Tabs Content script v2.2- συ½ Dynamic Drive DHTML code library (www.dynamicdrive.com)
+
+* This notice MUST stay intact for legal use
+
+* Visit Dynamic Drive at http://www.dynamicdrive.com/ for full source code
+
+***********************************************/
+
+</script>
+
+<SCRIPT LANGUAGE="JavaScript">
+
+function popUp(URL, w, h) {
+
+    day = new Date();
+
+     id = day.getTime();
+
+     eval("page" + id + " = window.open(URL, '" + id + "', 'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=0,width=" + w + ",height=" + h + ",left = 290,top = 212');");
+
+     }
+
+     </script>
+
+     </head>
+
+     <body>
+
+
+
+     <div id="header">
+
+     <div class="left"><a href="http://www.georgetown.edu/">Georgetown University</a> | <a href="http://uis.georgetown.edu/">University Information Services</a></div>
+
+     <div class="right"><a href="http://security.georgetown.edu/8933.html">Contact Us</a> | <a href="http://search.georgetown.edu/">Search</a> | <a href="http://explore.georgetown.edu/sites/">Site Index</a> | <a href="http://security.georgetown.edu/8934.html">About <abbr title="University Information Security Office">UISO</abbr></a></div>
+
+     </div>
+
+     <div id="title">
+
+     <h1><a href="http://security.georgetown.edu/">University Information Security Office</a></h1>
+
+     </div>
+
+<hr />
+
+<br />  
+
+
+
+<ul id="tabs" class="shadetabs" style="margin-left: 2em;">
+
+<li><a href="#" rel="#default" class="selected">Request New Firewall Rules</a></li>
+
+<li><a href="vpn_request.html" rel="countrycontainer">Request a System to a VPN Role</a></li>
+
+<li><a href="vpn_users.html" rel="countrycontainer">Request a User to a VPN Role</a></li>
+
+<li><a href="vpn_roles.html" rel="countrycontainer">Request a New VPN Role</a></li>
+
+</ul>
+
+
+
+<div id="countrydivcontainer" style="border:1px solid gray; width:94%; margin-bottom: 1em; margin-left: 1em; padding: 10px">
+
+<form name="fw_form" action="fw_form.html" method="post"> 
+
+<div id="bodycontent">
+
+
+
+
+
+<h1>Firewall Rule Request Form
+
+<BIG>Use this form to request a firewall access rule </BIG></h1>
+
+
+
+<table border=0 align="center" cellpadding=0 cellspacing=0 class=MsoNormalTable style='border-collapse:collapse;'>
+
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:15.5pt'>
+
+  <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+
+  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Requester's Name</span></b></td>
+
+  <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+
+  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Requester's Phone#</span></b></td>
+
+  <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+
+  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Requester's Email</span></b></td>
+
+  <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+
+    <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Department</span></b></td>
+
+  <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+
+    <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Cext-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Src Address<br>(FQDN)/Subnet Mask</span></b></td>
+
+  <td width="20%" align="center" valign=top style='border:solid black 1.0pt;border-left:none;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;'>
+
+    <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Dest. Address<br>(FQDN)/Subnet Mask</span></b></td>
+
+  <td width="5%" align="center" valign=top style='border:solid black 1.0pt;border-left:none;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;'>
+
+    <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Destination Protocol</span></b></td>
+
+  <td width="5%" align="center" valign=top style='border:solid black 1.0pt;border-left:none;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 1.0pt 0in 1.0pt;h'>
+
+    <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Destination Port</span></b></td>
+
+  <td width="10%" align="center" valign=top style='border:solid black 1.0pt;border-left:none;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 1.0pt 0in 1.0pt;'>
+
+    <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Add/Remove</span></b></td>
+
+  <td width="10%" align="center" valign=top style='border:solid black 1.0pt;border-left:none;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;'>
+
+    <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Traffic Encrypted</span></b></td>
+
+  <td width="20%" align="center" valign=top style='border:solid black 1.0pt;border-left:none;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 1.0pt 0in 1.0pt;'>
+
+  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Description</span></b></td>
+
+ </tr>
+
+ <tr style='mso-yfti-irow:1;height:19.0pt'>
+
+  <td width="4%" align="center" style='border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:19.0pt'>
+
+  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Ex.</spa  <td width="20%" align="center" style='border-top:none;border-left:nonleft:none;border-bottom:solid black 1.0pt;border-right:solid black 1k 1.0pt;border-right:solid black 1.0pt;
+
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 1.0pt 0in 1.0pt;height:18.5pt'>
+
+    <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+
+      <label>
+
+          <select name="action_5" id="action_5">
+            <option selected>Add</option>
+
+            <option>Remove</option>
+
+          </select>
+
+        </label></span>
+
+  </td>
+
+  <td width="10%" align="center" style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;mso-border-top-alt:
+
+  solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;height:19.0pt'>
+
+    <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+
+    <input type="radio" name="traffic_5" value="Y" checked>Y
+
+    <input type="radio" name="traffic_5" value="N">N
+
+    </span>
+
+  </td>
+
+  <td width="20%" align="center" style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+
+  mso-border-top-alt:solid black 

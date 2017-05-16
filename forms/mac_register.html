@@ -1,0 +1,308 @@
+<?php
+
+function ldap_authenticate() {
+    
+    if ($_SERVER['PHP_AUTH_USER'] != "" && $_SERVER['PHP_AUTH_PW'] != "") {
+        $ds=ldap_connect("ldaps://directory.georgetown.edu");
+	ldap_set_option($ds, LDAP_OPT_PROTOCOL_VERSION, 3);
+	$netid=$_SERVER['PHP_AUTH_USER'];
+	$filter="(uid=$netid)";
+	$ldap_user = "uid=" . $netid . ",ou=people,dc=georgetown,dc=edu";
+        if (ldap_bind( $ds, $ldap_user, $_SERVER['PHP_AUTH_PW']) ) {
+        	$r = ldap_search( $ds, 'ou=people,dc=georgetown,dc=edu', $filter);
+        	if ($r) {
+            		$result = ldap_get_entries( $ds, $r);
+            		if ($result[0]) {
+                    	return $result[0];
+                }
+            }
+        }
+    }
+    header('WWW-Authenticate: Basic realm="NetID Password Authentication"');
+    header('HTTP/1.0 401 Unauthorized');
+	echo 'Your authentication has failed. Please try again.';
+    return NULL;
+}
+
+if (($result = ldap_authenticate()) == NULL) {
+    exit(0);
+}
+
+?>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>UISO MAC Address Registration Form</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+
+		<link rel="stylesheet" type="text/css" href="css/template.css" media="screen" />
+		<script type="text/javascript">
+		function validateMAC(MAC){
+			regex=/^([0-9a-fA-F]{2}[-:]){5}/;
+			if (!(regex.test(MAC))){
+				alert("The MAC Address is not valid! The format must be in 00-00-00-00-00-00.");
+			}
+		}
+		</script>
+		<SCRIPT LANGUAGE="JavaScript">
+		function popUp(URL, w, h) {
+   			 day = new Date();
+   			 id = day.getTime();
+    		eval("page" + id + " = window.open(URL, '" + id + "', 'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=0,width=" + w + ",height=" + h + ",left = 290,top = 212');");
+		}
+		</script>
+
+</head>
+		<body style="width:775px;">
+
+		<div id="header">
+			<div class="left"><a href="http://www.georgetown.edu/">Georgetown University</a> | <a href="http://uis.georgetown.edu/">University Information Services</a></div>
+			<div class="right"><a href="http://security.georgetown.edu/8933.html">Contact Us</a> | <a href="http://search.georgetown.edu/">Search</a> | <a href="http://explore.georgetown.edu/sites/">Site Index</a> | <a href="http://security.georgetown.edu/8934.html">About <abbr title="University Information Security Office">UISO</abbr></a></div>
+		</div>
+		<div id="title">
+			<h1><a href="http://security.georgetown.edu/">University Information Security Office</a></h1>
+		</div>
+<hr />
+<br />  
+
+<div id="bodycontent">
+	<h1>MAC Address Registration Form</h1>
+	
+<?php if (strlen($_POST['mac_1']) != 0) { 
+
+include_once("sanitize.inc");
+require_once("conf/mac_db.conf");
+$req_name=sanitize($_POST['req_name'], SQL);
+$netid=sanitize($_POST['netid'], SQL);
+$phone=sanitize($_POST['phone'], SQL);
+$email=sanitize($_POST['email'], SQL);
+$notify=sanitize($_POST['notify'], SQL);
+$notify2=sanitize($_POST['notify2'], SQL);
+$Macnote="Registered by " . $_SERVER['PHP_AUTH_USER'] . "\r";
+if ($notify == 1) $Macnote .= "Notify by email - " . $email . "\r";
+if ($notify2 == 1) $Macnote .= "Notify by phone - " . $phone . "\r";
+
+// insert the MAC into the DB
+mysql_connect($db_host,$user,$password);
+@mysql_select_db($database) or die( "Unable to select database");
+
+for ($i=1; $i<6; $i++){
+	${"mac_".$i}=sanitize($_POST['mac_'.$i], SQL);
+
+	if(strlen(${"mac_".$i}) != 0){
+
+		${'mac_'.$i} = strtolower(${'mac_'.$i});
+
+		$insert1 = "INSERT INTO GeorgetownMAC (MAC, NetID, MACconfidence, MACnote, RDate, Notify, Email)
+                        VALUES('${'mac_'.$i}','$netid','100','$Macnote', now(), '1', '$email')";
+		mysql_query($insert1) or die(mysql_error());
+		}
+	}
+
+mysql_close();
+
+?>
+<p style="font-size:12px;color:#000000;" align="center">Thank you for registering your MAC address with UISO. Please click <a href="mac_register.html" style="color:#990000"><b>here</b></a> if you would like to register another MAC address.</p>
+<?php }
+	else { ?>
+
+	<h2>Why Register Your Computer</h2>
+	<p style="font-size:12px;color:#000000;">The University Information Security Office regularly monitors the Georgetown network to maintain a secure computing environment.
+When problems are detected through our monitoring systems, compromised computers are removed from the network and user's Internet access is revoked. Each computer connected to our network has a unique identifier called a MAC address. By registering your MAC address you will enable the helpdesk to contact you if your computer is compromised. Prior to this program the University had no capabilities of associating a user's computer with the user. Registering your computer facilitates a faster resolution of the problem and helps us get your system back online quickly.</p>
+<br />
+<p style="font-size:12px;color:#000000;">Please verify your contact information and the method through which you would like to be notified.</p>
+<form method="post" name="mac_reg" action="mac_register.html">
+<?php 
+	include_once("sanitize.inc");
+	$netid = sanitize($_SERVER['PHP_AUTH_USER'], SQL); 
+	
+	$dn = "ou=people,dc=georgetown,dc=edu";
+	$filter="(|(uid=$netid))";
+	$justthese = array("cn", "telephonenumber", "mail");
+
+	$ds=ldap_connect("directory.georgetown.edu");
+	$sr=ldap_search($ds, $dn, $filter, $justthese);
+	$info = ldap_get_entries($ds, $sr);
+	$fullname = $info[0]['cn'][0];
+	$telephone = $info[0]['telephonenumber'][0];
+	$email = $info[0]['mail'][0];
+	ldap_close($ds);
+	
+?>
+
+<table border=0 align="center" cellpadding=0 cellspacing=0 class=MsoNormalTable style='border-collapse:collapse;'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:15.5pt'>
+  <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Name</span></b></td>
+    <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>NetID</span></b></td>
+  <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Phone Number</span></b></td>
+  <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Email Address</span></b></td>
+  <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Notification Method</span></b></td>
+ </tr>
+ <tr style='mso-yfti-irow:1;mso-yfti-lastrow:yes;height:19pt'>
+  <td valign=middle align="center" style='border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 2pt 0in 2pt;height:19pt'>
+  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+      <input type="text" name="req_name" id="req_name" size="20" value="<? echo $fullname; ?>">
+    </span>
+  </td>
+    <td valign=middle align="center" style='border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 2pt 0in 2pt;height:19pt'>
+  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+      <input type="text" name="netid" id="netid" size="8" value="<? echo $netid; ?>">
+    </span>
+  </td>
+  <td valign=middle align="center" style='border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 2pt 0in 2pt;height:19pt'>
+  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+      <input type="text" name="phone" id="phone" size="12" value="<? echo $telephone; ?>">
+    </span>
+  </td>
+  <td valign=middle align="center" style='border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 2pt 0in 2pt;height:19pt'>
+  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+      <input type="text" name="email" id="email" size="24" value="<? echo $email; ?>">
+    </span>
+  </td>
+    <td valign=middle align="center" style='border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 2pt 0in 2pt;height:19pt'>
+  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+      <input type="checkbox" name="notify" id="email" value="1" checked="checked">Email &nbsp;<input type="checkbox" value="1" name="notify2" id="phone">Phone</span>
+  </td>
+ </tr>
+</table>
+<br />
+<p style="font-size:12px;color:#000000;">Please enter the MAC address of your network cards in the fields bellow. If you have more than one computer that you connect to the network or have a wired and a wireless network connection, you can enter upto five MAC addresses.</p>
+<p style="font-size:12px;color:#000000;">For information on how to obtain your MAC address click on the OS bellow: </p>
+<ul>
+	<li><a href="javascript:popUp('http://www-dcn.fnal.gov/DCG-Docs/mac/xp.html',700,500)"><b>for Microsoft Windows</b></a></li>
+	<li><a href="javascript:popUp('http://www-dcn.fnal.gov/DCG-Docs/mac/MAC-OS-X.html',700,500)"><b>for Mac OS X</b></a></li>
+	<li><a href="javascript:popUp('http://www-dcn.fnal.gov/DCG-Docs/mac/linux.html',700,500)"><b>for Linix OS</b></a></li>
+</ul>
+<br />
+<table align="center" class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="45%" style='width:45%;border-collapse:collapse;mso-padding-alt:0in 1.0pt 0in 1.0pt'>
+ <tr>
+  <td valign=top style='width:24.25pt;border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;'></td>
+  <td align="center" valign=top style='border:solid black 1.0pt;border-left:none;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 1pt 0in 1pt;'>
+    <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>MAC Address</span></b></td>
+  <td align="center" valign=top style='border:solid black 1.0pt;border-left:none;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;'>
+    <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Card Type</span></b></td>
+ </tr>
+ <tr style='mso-yfti-irow:1;height:19.0pt'>
+  <td align="center" style='border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:19.0pt'>
+  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Ex.</span>
+  </td>
+  <td align="center" style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:19.0pt'>
+    <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>1a-2b-3c-4d-5e-6f</span></td>
+  <td align="center" style='width:91.25pt;border-top:none;border-left:none;  border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;mso-border-top-alt:  solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;  padding:0in 5.4pt 0in 5.4pt;height:19.0pt'>
+    <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Wireless</span></td>
+ </tr>
+ <tr style='mso-yfti-irow:2;height:18.5pt'>
+  <td align="center" style='width:24.25pt;border:solid black 1.0pt;border-top:none;
+  mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt'>
+  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>1</span>
+  </td>
+  <td align="center" style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt'>
+    <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+      <input type="text" name="mac_1" size="18" onblur="validateMAC(this.value);"></span>
+  </td>
+  <td align="center" style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt'>
+    <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+      <select name="type_1">
+        <option selected>Wired</option>
+        <option>Wireless</option>
+      </select></span>
+  </td>
+ </tr>
+  <tr style='mso-yfti-irow:2;height:18.5pt'>
+  <td align="center" style='width:24.25pt;border:solid black 1.0pt;border-top:none;
+  mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt'>
+  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>2</span>
+  </td>
+  <td align="center" style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt'>
+    <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+      <input type="text" name="mac_2" size="18" onblur="validateMAC(this.value);"></span>
+  </td>
+  <td align="center" style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt'>
+    <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+      <select name="type_2">
+        <option selected>Wired</option>
+        <option>Wireless</option>
+      </select></span>
+  </td>
+ </tr>
+  <tr style='mso-yfti-irow:2;height:18.5pt'>
+  <td align="center" style='width:24.25pt;border:solid black 1.0pt;border-top:none;
+  mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt'>
+  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>3</span>
+  </td>
+  <td align="center" style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt'>
+    <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+      <input type="text" name="mac_3" size="18" onblur="validateMAC(this.value);"></span>
+  </td>
+  <td align="center" style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt'>
+    <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+      <select name="type_3">
+        <option selected>Wired</option>
+        <option>Wireless</option>
+      </select></span>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:2;height:18.5pt'>
+  <td align="center" style='width:24.25pt;border:solid black 1.0pt;border-top:none;
+  mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt'>
+  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>4</span>
+  </td>
+  <td align="center" style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt'>
+    <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+      <input type="text" name="mac_4" size="18" onblur="validateMAC(this.value);"></span>
+  </td>
+  <td align="center" style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt'>
+    <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+      <select name="type_4">
+        <option selected>Wired</option>
+        <option>Wireless</option>
+      </select></span>
+  </td>
+ </tr>
+  <tr style='mso-yfti-irow:2;height:18.5pt'>
+  <td align="center" style='width:24.25pt;border:solid black 1.0pt;border-top:none;
+  mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt'>
+  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>5</span>
+  </td>
+  <td align="center" style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt'>
+    <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+      <input type="text" name="mac_5" size="18" onblur="validateMAC(this.value);"></span>
+  </td>
+  <td align="center" style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt'>
+    <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+      <select name="type_5">
+        <option selected>Wired</option>
+        <option>Wireless</option>
+      </select></span>
+  </td>
+ </tr>
+</table>
+<p align="center">
+<input type="submit" name="Submit" value="Submit" /> &nbsp; &nbsp; <input type="reset" name="reset" value="Clear" /></p>
+</form>
+<p style="font-size:12px;color:#000000;">* For aditional informaiton of for assistance in obtaining your MAC address please contact the UIS Help Desk at 202-687-4577.</p><br />
+<?php } ?>
+	</div>
+
+	<div id="footer">
+		<div class="left"><a href="http://www.georgetown.edu/">Georgetown University</a> | <a href="http://uis.georgetown.edu/">University Information Services</a></div>
+		<div class="right"><a href="http://security.georgetown.edu/8933.html">Contact Us</a> | <a href="http://search.georgetown.edu/">Search</a> | <a href="http://explore.georgetown.edu/sites/">Site Index</a> | <a href="http://security.georgetown.edu/8934.html">About <abbr title="University Information Security Office">UISO</abbr></a></div>
+		</div>
+	</body>
+</html> 

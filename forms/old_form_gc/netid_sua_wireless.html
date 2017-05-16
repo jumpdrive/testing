@@ -1,0 +1,378 @@
+<?php
+
+function ldap_authenticate() {
+    
+    if ($_SERVER['PHP_AUTH_USER'] != "" && $_SERVER['PHP_AUTH_PW'] != "") {
+        $ds=ldap_connect("ldaps://directory.georgetown.edu");
+	ldap_set_option($ds, LDAP_OPT_PROTOCOL_VERSION, 3);
+	$netid=$_SERVER['PHP_AUTH_USER'];
+	$filter="(|(uid=$netid))";
+
+        $ldap_user = "uid=" . $netid . ",ou=people,dc=georgetown,dc=edu";
+#	$ldap_user = 'uid=UISOVPNReportingUIDMapping,ou=Specials,dc=georgetown,dc=edu';
+#        $ldap_pass = '7/xoFVeC1CAHOHL+n1NHhK5i15UPrk9v';
+ 
+         if (ldap_bind( $ds, $ldap_user, $_SERVER['PHP_AUTH_PW']) ) {
+ #       if (ldap_bind( $ds, $ldap_user, $ldap_pass) ) {
+        	$r = ldap_search( $ds, 'ou=people,dc=georgetown,dc=edu', $filter);
+        	if ($r) {
+            		$result = ldap_get_entries( $ds, $r);
+            		if ($result[0]) {
+                    	return $result[0];
+                }
+            }
+        }
+    }
+    header('WWW-Authenticate: Basic realm="NetID Password Authentication"');
+    header('HTTP/1.0 401 Unauthorized');
+	echo 'Your authentication has failed. Please try again.';
+    return NULL;
+}
+
+if (($result = ldap_authenticate()) == NULL) {
+    exit(0);
+}
+
+?>
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>Associate Wireless Access Request</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+
+		<link rel="stylesheet" type="text/css" href="css/netid_template.css" media="screen" />
+		<script src='javascript/mootools-yui-compressed.js' type='text/javascript'></script>
+		<script src='javascript/flext-uncompressed.js' type='text/javascript' ></script>
+
+	</head>
+	<body>
+
+		<div id="header">
+			<div class="left"><a href="http://www.georgetown.edu/">Georgetown University</a> | <a href="http://uis.georgetown.edu/">University Information Services</a></div>
+			<div class="right"><a href="http://security.georgetown.edu/8933.html">Contact Us</a> | <a href="http://search.georgetown.edu/">Search</a> | <a href="http://explore.georgetown.edu/sites/">Site Index</a> | <a href="http://security.georgetown.edu/8934.html">About <abbr title="University NetID Services">NetID</abbr></a></div>
+		</div>
+		<div id="title">
+			<h1><a href="http://netid.georgetown.edu/">University NetID Services</a></h1>
+		</div>
+<hr />
+<br />  
+
+<? if (strlen($_POST['oncethrough']) != 0){ 
+
+include_once("sanitize.inc");
+include_once("conf/fw_db.conf");
+
+function send_email($from, $reply, $to, $subject, $message){
+        $headers = 'From: ' . $from . "\n";
+        $headers .= 'Reply-To: ' . $reply . "\n";
+        $headers .= 'Return-Path: ' . $reply . "\n";
+		$headers .= 'X-Mailer: PHP/' . phpversion() . "\n";
+        mail($to,$subject,$message,$headers);
+}
+
+function send_email_html($from, $reply, $to, $cc, $subject, $message){
+        $headers = 'From: ' . $from . "\n";
+        $headers .= 'Reply-To: ' . $reply . "\n";
+		$headers .= 'CC: ' . $cc . "\n";
+        $headers .= 'Return-Path: ' . $reply . "\n";
+		$headers .= 'X-Mailer: PHP/' . phpversion() . "\n";
+		$headers  .= 'MIME-Version: 1.0' . "\n";
+		$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\n";
+        mail($to,$subject,$message,$headers);
+}
+
+# insert the request in db
+mysql_connect($db_host,$user,$password);
+@mysql_select_db($database) or die( "Unable to select database");
+
+$req_netid=sanitize($_POST['netid'], SQL);
+$req_name=sanitize($_POST['fullname'], SQL);
+$req_email=sanitize($_POST['email'], SQL);
+$req_telephone=sanitize($_POST['telephone'], SQL);
+$req_dept=sanitize($_POST['dept'], SQL);
+$req_auth_netid = $_SERVER['PHP_AUTH_USER'];
+
+$rec_netid=sanitize($_POST['rec_netid'], SQL);
+$rec_name=sanitize($_POST['rec_name'], SQL);
+$rec_role=sanitize($_POST['rec_role'], SQL);
+$rec_ext_email=sanitize($_POST['rec_ext_email'], SQL);
+$rec_comments=sanitize($_POST['rec_comments'], SQL);
+
+$insert1 = "INSERT INTO netid_sua_wireless (req_netid, req_auth_netid, req_name, req_email, req_phone, req_dept, rec_netid, rec_name, rec_role, rec_ext_email, rec_comments)
+            VALUES('$req_netid', '$req_auth_netid', '$req_name', '$req_email', '$req_telephone', '$req_dept', '$rec_netid', '$rec_name', '$rec_role', '$rec_ext_email', '$rec_comments')";
+			
+mysql_query($insert1) or die(mysql_error());
+mysql_close();
+
+#Send Confirmation email
+$conf_to = $req_email;
+$conf_cc = "netid@georgetown.edu"; #change this to netid email
+$conf_from = "NetID Office <netid@georgetown.edu>";
+$conf_subject = "Associate Wireless Access Request";
+
+$conf_msg = "<html><body>Request Date: ";
+$conf_msg .= date("F j, Y, g:i a");
+$conf_msg .= "<br /><br />Your Associate Wireless Access Request has been submitted with the following information:<br /><br />
+	<center><h3>Sponsored University Associate Information</h3></center>
+	<table border=0 align='center' cellpadding=0 cellspacing=0 class=MsoNormalTable style='border-collapse:collapse;'>
+ 		<tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:19pt'>
+  			<td align='left' style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:19pt'>
+  			<b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Recipient's NetID</span></b></td>
+			<td align='left' style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;mso-border-alt:solid black .5pt; padding:0in 2pt 0in 2pt;height:19pt'><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>"
+      		. $rec_netid . "</span></td>
+  		</tr>
+		<tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:19pt'>
+  			<td align='left' style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:19pt'>
+  			<b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Recipient's Name</span></b></td>
+			<td valign=left style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;mso-border-alt:solid black .5pt; padding:0in 2pt 0in 2pt;height:19pt'><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>"
+      		. $rec_name . "</span></td>
+  		</tr>
+		<tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:19pt'>
+  			<td align='left' style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:19pt'>
+  			<b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Recipient's Role in your Department</span></b></td>
+			<td align='left' style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;mso-border-alt:solid black .5pt; padding:0in 2pt 0in 2pt;height:19pt'><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>"
+      		. $rec_role . "</span></td>
+  		</tr>
+		<tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:19pt'>
+  			<td align='left' style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:19pt'>
+  			<b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Recipient non-GU email address</span></b></td>
+			<td align='left' style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;mso-border-alt:solid black .5pt; padding:0in 2pt 0in 2pt;height:19pt'><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>"
+      		. $rec_ext_email . "</span></td>
+  		</tr>
+		<tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:19pt'>
+  			<td align='left' style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:19pt'>
+  			<b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Business purpose for<br />this wireless access request</span></b></td>
+			<td align='left' style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;mso-border-alt:solid black .5pt; padding:0in 2pt 0in 2pt;height:19pt'><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>"
+      		. $rec_comments . "</span></td>
+  		</tr>
+	</table>
+<br /><br />
+	<center><h3>Account Sponsor Information</h3></center>
+<table border=0 align='center' cellpadding=0 cellspacing=0 class=MsoNormalTable style='border-collapse:collapse;'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:15.5pt'>
+  <td valign=top align='center' style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>NetID</span></b></td>
+  <td valign=top align='center' style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Full Name</span></b></td>
+  <td valign=top align='center' style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Email</span></b></td>
+  <td valign=top align='center' style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Phone #</span></b></td>
+  <td valign=top align='center' style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+    <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Department Name</span></b></td>
+ </tr>
+ <tr style='mso-yfti-irow:1;mso-yfti-lastrow:yes;height:19pt'>
+  <td valign=middle align='center' style='border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;
+  padding:0in 2pt 0in 2pt;height:19pt'>
+  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>"
+      . $req_netid . "
+    </span>
+  </td>
+  <td valign=middle align='center' style='border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;
+  padding:0in 2pt 0in 2pt;height:19pt'>
+  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>"
+      . $req_name . "
+    </span>
+  </td>
+  <td valign=middle align='center' style='border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;
+  padding:0in 2pt 0in 2pt;height:19pt'>
+  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>"
+      . $req_email . "
+    </span>
+  </td>
+  <td valign=middle align='center' style='border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;
+  padding:0in 2pt 0in 2pt;height:19pt'>
+  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>"
+      . $req_telephone . "
+    </span>
+  </td>
+  <td valign=middle align='center' style='border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;
+  padding:0in 2pt 0in 2pt;height:19pt'>
+  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>"
+        . $req_dept . "
+        </span>
+    </td>
+ </tr>
+</table><br />
+";
+$conf_msg .= "The Associate will be contacted once their wireless access has been provisioned.<br /><br />";
+$conf_msg .= "Request received from " . $_SERVER['REMOTE_ADDR'] . " by " . $req_auth_netid . ".";
+$conf_msg .="</body></html>";
+
+#Send email to the Help Desk to open ticket
+$hd_to = "NetID@georgetown.edu"; #change this to help@georgetown.edu
+$hd_replyto = $req_email;
+$hd_from = "NetID Office <netid@georgetown.edu>";
+$hd_subject = "Associate Wireless Access Request";
+
+$hd_msg = "Helpdesk,\n\n";
+$hd_msg .= "Please open a ticket for wireless access request and assign it to the NetID Office.\n\n";
+$hd_msg .= "Recipient's NetID: " . $rec_netid . "\n";
+$hd_msg .= "Recipient's Name: " . $rec_name . "\n";
+$hd_msg .= "Recipient's Alternate Email: " . $rec_ext_email . "\n";
+$hd_msg .= "Recipient's Role: " . $rec_role . "\n";
+$hd_msg .= "Business purpose: " . $rec_comments . "\n";
+$hd_msg .= "Request Date: " . date("F j, Y, g:i a") . "\n\n";
+
+$hd_msg .= "Sponsor's Netid: " . $req_netid . "\n";
+$hd_msg .= "Sponsor's Name: " . $req_name . "\n";
+$hd_msg .= "Sponsor's Email: " . $req_email . "\n";
+$hd_msg .= "Sponsor's Phone: " . $req_telephone . "\n";
+$hd_msg .= "Sponsor's Department: " . $req_dept . "\n\n";
+
+$hd_msg .= "Request received from " . $_SERVER['REMOTE_ADDR'] . " by " . $req_auth_netid . ".";
+
+
+send_email_html($conf_from, $conf_from, $conf_to, $conf_cc, $conf_subject, $conf_msg);
+send_email($hd_from, $hd_replyto, $hd_to, $hd_subject, $hd_msg);
+
+?>
+<center>
+Your request for associate wireless access has been successfuly submitted. You will receive a confirmation e-mail shortly.
+<br /><br />
+Please close your browser to securely logout of this system.</center><br />
+
+<?
+	}
+else
+	{ ?>
+
+<form name="affiliate_gumail" action="netid_sua_wireless.html" method="post">
+<div id="bodycontent">
+<?php 
+	include_once("sanitize.inc");
+	$netid = sanitize($_SERVER['PHP_AUTH_USER'], SQL);
+	
+	$dn = "ou=people,dc=georgetown,dc=edu";
+	$filter="(uid=$netid)";
+	$justthese = array("cn", "telephonenumber", "mail", "ou", "title");
+
+	$ds=ldap_connect("ldaps://directory.georgetown.edu");
+
+         $ldap_user = "uid=" . $netid . ",ou=people,dc=georgetown,dc=edu";
+
+
+#	$ldap_user = 'uid=UISOVPNReportingUIDMapping,ou=Specials,dc=georgetown,dc=edu';
+#        $ldap_pass = '7/xoFVeC1CAHOHL+n1NHhK5i15UPrk9v';
+         if (ldap_bind( $ds, $ldap_user, $_SERVER['PHP_AUTH_PW']) ) {
+
+#	if (ldap_bind( $ds, $ldap_user, $ldap_pass) ) {
+		$sr=ldap_search($ds, $dn, $filter, $justthese);
+		$info = ldap_get_entries($ds, $sr);
+		$fullname = $info[0]['cn'][0];
+		$telephone = $info[0]['telephonenumber'][0];
+		$email = $info[0]['mail'][0];
+		$dept = $info[0]['ou'][0];
+		$title = $info[0]['title'][0];
+		ldap_close($ds);
+	}
+	
+?>
+	<h1>Associate Wireless Access Request</h1>
+		<p><font color="#000000" size="2">This form must be completed <b>by the sponsor</b> of the Sponsored University Associate requesting secure wireless access for Georgetown University business purposes.<br /><br />
+	
+<b>Note that the Associate may not complete this form on his or her own behalf; it must be submitted by the
+Associate's Sponsor.</b><br /><br />
+
+Please allow 3-5 business days for the secure wireless account to be activated</font></p>
+<br />
+	<h2>Account Recipient Information</h2>
+	<p><font color="#000000" size="2">Please provide the following information about the person for whom wireless access is requested.</font></p>
+	<table border=0 align="center" cellpadding=0 cellspacing=0 class=MsoNormalTable style='border-collapse:collapse;'>
+ 		<tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:19pt'>
+  			<td align="left" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:19pt'>
+  			<b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Recipient's NetID</span></b></td>
+			<td align="left" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;mso-border-alt:solid black .5pt; padding:0in 2pt 0in 2pt;height:19pt'><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+      		<input type="text" name="rec_netid" id="rec_netid" size="30"></span></td>
+  		</tr>
+		<tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:19pt'>
+  			<td align="left" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:19pt'>
+  			<b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Recipient's Name</span></b></td>
+			<td valign=left style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;mso-border-alt:solid black .5pt; padding:0in 2pt 0in 2pt;height:19pt'><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+      		<input type="text" name="rec_name" id="rec_name" size="30"></span></td>
+  		</tr>
+		<tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:19pt'>
+  			<td align="left" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:19pt'>
+  			<b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Recipient's Role in your Department</span></b></td>
+			<td align="left" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;mso-border-alt:solid black .5pt; padding:0in 2pt 0in 2pt;height:19pt'><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+      		<input type="text" name="rec_role" id="rec_role" size="30"></span></td>
+  		</tr>
+		<tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:19pt'>
+  			<td align="left" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:19pt'>
+  			<b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Recipient's email address</span></b></td>
+			<td align="left" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;mso-border-alt:solid black .5pt; padding:0in 2pt 0in 2pt;height:19pt'><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+      		<input type="text" name="rec_ext_email" id="rec_ext_email" size="30"></span></td>
+  		</tr>
+		<tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:19pt'>
+  			<td align="left" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:19pt'>
+  			<b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Business purpose for<br />this wireless access request</span></b></td>
+			<td align="left" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;mso-border-alt:solid black .5pt; padding:0in 2pt 0in 2pt;height:19pt'><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+      		<textarea class='flext growme' name="rec_comments" cols="30" rows="3"></textarea></span></td>
+  		</tr>
+	</table>
+<br /><br />
+	<h2>Account Requester Information</h2>
+	<p><font color="#000000" size="2">Please provide the following information about yourself.</font></p>
+<table border=0 align="center" cellpadding=0 cellspacing=0 class=MsoNormalTable style='border-collapse:collapse;'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:15.5pt'>
+  <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>NetID</span></b></td>
+  <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Full Name</span></b></td>
+  <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Email</span></b></td>
+  <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Phone #</span></b></td>
+  <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+    <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Department Name</span></b></td>
+ </tr>
+ <tr style='mso-yfti-irow:1;mso-yfti-lastrow:yes;height:19pt'>
+  <td valign=middle align="center" style='border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;
+  padding:0in 2pt 0in 2pt;height:19pt'>
+  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+      <input type="text" name="netid" id="netid" size="10" value="<? echo $netid; ?>">
+    </span>
+  </td>
+  <td valign=middle align="center" style='border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;
+  padding:0in 2pt 0in 2pt;height:19pt'>
+  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+      <input type="text" name="fullname" id="fullname" size="20" value="<? echo $fullname; ?>">
+    </span>
+  </td>
+  <td valign=middle align="center" style='border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;
+  padding:0in 2pt 0in 2pt;height:19pt'>
+  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+      <input type="text" name="email" id="email" size="24" value="<? echo $email; ?>">
+    </span>
+  </td>
+  <td valign=middle align="center" style='border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;
+  padding:0in 2pt 0in 2pt;height:19pt'>
+  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+      <input type="text" name="telephone" id="telephone" size="12" value="<? echo $telephone; ?>">
+    </span>
+  </td>
+  <td valign=middle align="center" style='border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;
+  padding:0in 2pt 0in 2pt;height:19pt'>
+  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+        <input type="text" name="dept" id="dept" size="25" value="<? echo $dept ?>">
+        </span>
+    </td>
+ </tr>
+</table>
+<br />
+
+
+<p class=Default align=center style='text-align:center'><b><span style='color:windowtext'>
+<input type="submit" name ="submit" value ="Submit">
+<input type="reset" name="Clear"></span></b></p>
+<input type="hidden" name="oncethrough" value="Yes">
+	</div>
+	</form> <? } ?>
+	<div id="footer">
+		<div class="left"><a href="http://www.georgetown.edu/">Georgetown University</a> | <a href="http://uis.georgetown.edu/">University Information Services</a></div>
+		<div class="right"><a href="http://security.georgetown.edu/8933.html">Contact Us</a> | <a href="http://search.georgetown.edu/">Search</a> | <a href="http://explore.georgetown.edu/sites/">Site Index</a> | <a href="http://security.georgetown.edu/8934.html">About <abbr title="University NetID Services">NetID</abbr></a></div>
+		</div>
+	</body>
+</html> 

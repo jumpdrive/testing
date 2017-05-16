@@ -1,0 +1,262 @@
+<?php
+
+function ldap_authenticate() {
+
+    if ($_SERVER['PHP_AUTH_USER'] != "" && $_SERVER['PHP_AUTH_PW'] != "") {
+        $ds=ldap_connect("ldaps://directory.georgetown.edu");
+	ldap_set_option($ds, LDAP_OPT_PROTOCOL_VERSION, 3);
+	$netid=$_SERVER['PHP_AUTH_USER'];
+	$filter="(uid=$netid)";
+        $ldap_user = "uid=" . $netid . ",ou=people,dc=georgetown,dc=edu";
+        if (ldap_bind( $ds, $ldap_user, $_SERVER['PHP_AUTH_PW'])) {
+        	$r = ldap_search( $ds, 'ou=people,dc=georgetown,dc=edu', $filter);
+        	if ($r) {
+            		$result = ldap_get_entries( $ds, $r);
+            		if ($result[0]) {
+                    	return $result[0];
+                }
+            }
+        }
+    }
+    header('WWW-Authenticate: Basic realm="NetID Password Authentication"');
+    header('HTTP/1.0 401 Unauthorized');
+	echo 'Your authentication has failed. Please try again.';
+    return NULL;
+}
+
+if (($result = ldap_authenticate()) == NULL) {
+    exit(0);
+}
+
+?>
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>GUMail Affiliate Usage Agreement Form</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+
+		<link rel="stylesheet" type="text/css" href="css/netid_template.css" media="screen" />
+		<script src='javascript/mootools-yui-compressed.js' type='text/javascript'></script>
+		<script src='javascript/flext-uncompressed.js' type='text/javascript' ></script>
+
+	</head>
+	<body>
+
+		<div id="header">
+			<div class="left"><a href="http://www.georgetown.edu/">Georgetown University</a> | <a href="http://uis.georgetown.edu/">University Information Services</a></div>
+			<div class="right"><a href="http://security.georgetown.edu/8933.html">Contact Us</a> | <a href="http://search.georgetown.edu/">Search</a> | <a href="http://explore.georgetown.edu/sites/">Site Index</a> | <a href="http://security.georgetown.edu/8934.html">About <abbr title="University NetID Services">NetID</abbr></a></div>
+		</div>
+		<div id="title">
+			<h1><a href="http://netid.georgetown.edu/">University NetID Services</a></h1>
+		</div>
+<hr />
+<br />  
+
+<? if (strlen($_POST['oncethrough']) != 0){ 
+
+include_once("sanitize.inc");
+include_once("conf/fw_db.conf");
+
+function send_email($from, $reply, $to, $cc, $subject, $message){
+        $headers = 'From: ' . $from . "\n";
+		$headers .= 'CC: ' . $cc . "\n";
+        $headers .= 'Reply-To: ' . $reply . "\n";
+        $headers .= 'Return-Path: ' . $reply . "\n";
+		$headers .= 'X-Mailer: PHP/' . phpversion() . "\n";
+        mail($to,$subject,$message,$headers);
+}
+
+function send_email_html($from, $reply, $to, $cc, $subject, $message){
+        $headers = 'From: ' . $from . "\n";
+        $headers .= 'Reply-To: ' . $reply . "\n";
+		$headers .= 'CC: ' . $cc . "\n";
+        $headers .= 'Return-Path: ' . $reply . "\n";
+		$headers .= 'X-Mailer: PHP/' . phpversion() . "\n";
+		$headers  .= 'MIME-Version: 1.0' . "\n";
+		$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\n";
+        mail($to,$subject,$message,$headers);
+}
+
+# insert the request in db
+mysql_connect($db_host,$user,$password);
+@mysql_select_db($database) or die( "Unable to select database");
+
+$r_id=sanitize($_POST['r_id'], SQL);
+$agr1=sanitize($_POST['agreement_1'], SQL);
+$agr2=sanitize($_POST['agreement_2'], SQL);
+$agr3=sanitize($_POST['agreement_3'], SQL);
+$agr4=sanitize($_POST['agreement_4'], SQL);
+$rec_ext_email=sanitize($_POST['rec_ext_email'], SQL);
+$req_email=sanitize($_POST['req_email'], SQL);
+$rec_netid=sanitize($_POST['netid'], SQL);
+$rec_fullname=sanitize($_POST['fullname'], SQL);
+$rec_phone=sanitize($_POST['phone'], SQL);
+
+$insert1 = "UPDATE netid_affiliate_gumail 
+			SET agr1 = '$agr1', agr2 = '$agr2', agr3 = '$agr3', agr4 = '$agr4', agr_timestamp = NOW()
+			WHERE id = '$r_id'";
+			
+mysql_query($insert1) or die(mysql_error());
+mysql_close();
+
+#Send confirmation email
+$conf_to = $rec_ext_email;
+$conf_cc = "netid@georgetown.edu"; #change to NetID Office email
+$conf_replyto = "NetID Office <netid@georgetown.edu>";
+$conf_from = "NetID Office <netid@georgetown.edu>";
+$conf_subject = "Affiliate GUMail Usage Agreement Confirmation";
+
+$conf_msg = $rec_fullname . ",\n\n";
+$conf_msg .= "Thank you for submitting the Affiliate GUMail Usage Agreement form. You request will be processed shortly.\n\n";
+$conf_msg .= "NetID: " . $rec_netid . "\n";
+$conf_msg .= "Name: " . $rec_fullname . "\n";
+$conf_msg .= "Phone: " . $rec_phone . "\n";
+$conf_msg .= "Request Date: " . date("F j, Y, g:i a") . "\n\n";
+
+$conf_msg .= "Responsible for Account Activity: " . $agr1 . "\n";
+$conf_msg .= "Agreement to abide by Acceptible Use Policy: " . $agr2 . "\n";
+$conf_msg .= "Agreement to Confidentiality Statement: " . $agr3 . "\n";
+$conf_msg .= "Agreement to Revocation Terms: " . $agr4 . "\n\n";
+
+$conf_msg .= "Request received from " . $_SERVER['REMOTE_ADDR'] . ".";
+
+#Send confirmation email to sponsor
+$spon_to = $req_email;
+$spon_cc = "netid@georgetown.edu"; #change to NetID Office email
+$spon_replyto = "NetID Office <netid@georgetown.edu>";
+$spon_from = "NetID Office <netid@georgetown.edu>";
+$spon_subject = "Affiliate GUMail Usage Agreement Confirmation";
+
+$spon_msg .= "Affiliate " . $rec_fullname . " has submitted the Affiliate GUMail Usage Agreement. A GUMail account will be created in 3-5 business days,";
+$spon_msg .= " and the Affiliate will be notified of its completion.\n\n";
+$spon_msg .= "NetID Office, UIS\n";
+$spon_msg .= "netid@georgetown.edu\n";
+$spon_msg .= "202-687-2999\n\n";
+
+send_email($conf_from, $conf_replyto, $conf_to, $conf_cc, $conf_subject, $conf_msg);
+send_email($spon_from, $spon_replyto, $spon_to, '', $spon_subject, $spon_msg);
+
+?>
+<center>
+Your Agreement for affiliate GUMail account has been successfully submitted. You will receive a confirmation e-mail shortly.
+<br /><br />
+Please close your browser to securely logout of this system.</center><br />
+
+<?
+	}
+else
+	{ ?>
+
+<form name="affiliate_agreement" action="netid_affiliate_agreement.html" method="post">
+<div id="bodycontent">
+<?php 
+	include_once("sanitize.inc");
+	include_once("conf/fw_db.conf");
+	$netid = sanitize($_SERVER['PHP_AUTH_USER'], SQL);
+	
+	#Select the record from the db for this request
+	mysql_connect($db_host,$user,$password);
+	@mysql_select_db($database) or die( "Unable to select database");
+	$select1 = "SELECT id,rec_netid,rec_ext_email, req_email
+				FROM netid_affiliate_gumail 
+				WHERE rec_netid = '$netid' AND 
+					  agr1 IS NULL AND
+					  agr2 IS NULL AND
+					  agr3 IS NULL AND
+					  agr4 IS NULL AND
+					  agr_timestamp is NULL
+				LIMIT 0,1";
+	$result=mysql_query($select1) or die(mysql_error());
+	$r_id = mysql_result($result, 0, "id");
+	$rec_ext_email = mysql_result($result, 0, "rec_ext_email");
+	$req_email = mysql_result($result, 0, "req_email");
+	mysql_close();
+	
+	$dn = "ou=people,dc=georgetown,dc=edu";
+	$filter="(uid=$netid)";
+	$justthese = array("cn", "telephonenumber", "mail", "ou", "title");
+
+	$ds=ldap_connect("ldaps://directory.georgetown.edu");
+       $ldap_user = "uid=" . $netid . ",ou=people,dc=georgetown,dc=edu";
+
+#	$ldap_user = 'uid=UISOVPNReportingUIDMapping,ou=Specials,dc=georgetown,dc=edu';
+#        $ldap_pass = '7/xoFVeC1CAHOHL+n1NHhK5i15UPrk9v';
+          if (ldap_bind( $ds, $ldap_user, $_SERVER['PHP_AUTH_PW'])) {
+
+#        if (ldap_bind( $ds, $ldap_user, $ldap_pass)) {
+		$sr=ldap_search($ds, $dn, $filter, $justthese);
+		$info = ldap_get_entries($ds, $sr);
+		$fullname = $info[0]['cn'][0];
+		$telephone = $info[0]['telephonenumber'][0];
+		$email = $info[0]['mail'][0];
+		$dept = $info[0]['ou'][0];
+		$title = $info[0]['title'][0];
+		ldap_close($ds);
+	}
+	
+	#check if this is the right user agreening and/or if they have already agreed
+	if ($r_id){
+ ?>
+         <h1>GUMail Affiliate Usage Agreement Form </h1>
+	<p><font color="#000000" size="2">This agreement has already been submitted or you are not authrozied to sign it.</font></p>
+	
+<? }
+	else {
+	?>
+
+	<h1>GUMail Affiliate Usage Agreement Form</h1>
+	<p><font color="#000000" size="2">Please fill out this form to request your GUMail account. The NetID Office may follow up and request additional information before the account can be created.</font></p>
+	<p><font color="#000000" size="2">Please provide the following information about yourself.</font></p>
+	<table border=0 align="center" cellpadding=0 cellspacing=0 class=MsoNormalTable style='border-collapse:collapse;'>
+ 		<tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:19pt'>
+  			<td align="left" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:19pt'>
+  			<b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>NetID</span></b></td>
+			<td align="left" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;mso-border-alt:solid black .5pt; padding:0in 2pt 0in 2pt;height:19pt'><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+      		<input type="text" name="netid" id="netid" size="30" value="<? echo $netid; ?>"></span></td>
+  		</tr>
+		<tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:19pt'>
+  			<td align="left" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:19pt'>
+  			<b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Full Name</span></b></td>
+			<td valign=left style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;mso-border-alt:solid black .5pt; padding:0in 2pt 0in 2pt;height:19pt'><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+      		<input type="text" name="fullname" id="fullname" size="30" value="<? echo $fullname; ?>"></span></td>
+  		</tr>
+		<tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:19pt'>
+  			<td align="left" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:19pt'>
+  			<b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Phone #</span></b></td>
+			<td align="left" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;mso-border-alt:solid black .5pt; padding:0in 2pt 0in 2pt;height:19pt'><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+      		<input type="text" name="phone" id="phone" size="30" value="<? echo $telephone; ?>"></span></td>
+  		</tr>
+	</table>
+<br />
+	<h3>By clicking the below boxes, you agree to the following four statements:</h3>
+	<p><font color="#000000" size="2">1. I am responsible for all activity associated with this GUMail Account, including but not limited to, transmission and receipt of email, sharing folders, and granting access to the account; and</font></p>
+	<center><input type="radio" name="agreement_1" id="agreement_1" value="Y"/> I agree &nbsp;&nbsp;<input type="radio" name="agreement_1" id="agreement_1" value="N"/> I do not agree</center>
+<br />
+	<p><font color="#000000" size="2">2. I have read, and I acknowledge that I will be held accountable for any abuse of Georgetown University Computer Systems <a href="http://policies.georgetown.edu/31641.html">Acceptable Use Policy</a> attributed to this account; and</font></p>
+	<center><input type="radio" name="agreement_2" id="agreement_2" value="Y"/> I agree &nbsp;&nbsp;<input type="radio" name="agreement_2" id="agreement_2" value="N"/> I do not agree</center>
+<br />
+	<p><font color="#000000" size="2">3. I have read, and I acknowledge that I will be held accountable for any abuse of the terms of the <a href="http://policies.georgetown.edu/31641.html">GUMail Confidentiality Agreement</a>; and</font></p>
+	<center><input type="radio" name="agreement_3" id="agreement_3" value="Y"/> I agree &nbsp;&nbsp;<input type="radio" name="agreement_3" id="agreement_3" value="N"/> I do not agree</center>
+<br />
+	<p><font color="#000000" size="2">4. I understand that the owner of this account is Georgetown University, and as such access to this account may be revoked at any time. </font></p>
+	<center><input type="radio" name="agreement_4" id="agreement_4" value="Y"/> I agree &nbsp;&nbsp;<input type="radio" name="agreement_4" id="agreement_4" value="N"/> I do not agree</center>
+<br />
+<p class=Default align=center style='text-align:center'><b><span style='color:windowtext'>
+<input type="submit" name ="submit" value ="Submit">
+<input type="reset" name="Clear"></span></b></p>
+<input type="hidden" name="oncethrough" value="Yes">
+<input type="hidden" name="r_id" value="<? echo $r_id; ?>">
+<input type="hidden" name="rec_ext_email" value="<? echo $rec_ext_email; ?>">
+<input type="hidden" name="req_email" value="<? echo $req_email; ?>">
+	</div>
+	</form> <? } 
+	}
+	?>
+	<div id="footer">
+		<div class="left"><a href="http://www.georgetown.edu/">Georgetown University</a> | <a href="http://uis.georgetown.edu/">University Information Services</a></div>
+		<div class="right"><a href="http://security.georgetown.edu/8933.html">Contact Us</a> | <a href="http://search.georgetown.edu/">Search</a> | <a href="http://explore.georgetown.edu/sites/">Site Index</a> | <a href="http://security.georgetown.edu/8934.html">About <abbr title="University NetID Services">NetID</abbr></a></div>
+		</div>
+	</body>
+</html> 

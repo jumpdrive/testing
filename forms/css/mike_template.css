@@ -1,0 +1,259 @@
+/* Set element style defaults so that they are consistent across browsers */
+html, div, ul, ol, dl, dd, dt, menu, dir, blockquote, h1, h2, h3, h4, h5, h6, form, pre, fieldset 
+{ 
+	margin: 0px; 
+	padding: 0px; 
+	font-weight: normal; 
+	font-size: 1em; 
+	text-indent: 0px; 
+	font-style: normal;
+    word-wrap: break-word;
+}
+img { margin: 0px; padding: 0px; border-width: 0px; position:absolute; }
+abbr, acronym { border-width: 0px; }
+a img
+{
+	border-width: 0px;
+}
+a
+{
+	color: #000066;
+	text-decoration: inherit;
+}
+#middle-column li
+{
+	margin-left: 30px;
+}
+#middle-column p
+{
+	margin-top: 1em;
+	margin-bottom: 1em;
+}
+#header .left, #footer .left
+{
+	float: left;
+}
+#header .right, #footer .right
+{
+	float: right;
+}
+#navigation li
+{
+	display: inline;
+}
+
+/* Set up the default layout */
+
+html 
+{
+	background-color: #ececec;
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+}
+
+body
+{
+	background-color: #fff;	
+	width: 900px;
+	border: 1px solid #004b7b;
+	font-size: 10pt;
+	margin-top: 20px;
+	margin-left: auto;
+	margin-right: auto;
+	position: relative;
+}
+
+li
+{	font-size: 9pt;
+	font-family: Arial, Helvetica, sans-serif;
+	color: #666666;
+	color:windowtext;
+	text-align:left;
+	margin-left:20px;
+}
+
+p {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	color: #004b7b;
+	font-weight: normal;
+}
+
+h1
+{
+	font-size: 11pt;
+ 	font-weight: bold;
+ 	color: #004b7b;
+	padding-bottom: 10px;
+}
+
+h2
+{
+	font-size: 9pt;
+	font-weight: bold;
+	color: #c76d00;
+	padding-bottom: 5px;
+}
+
+h3{ 
+	font-size: 8pt;
+	font-weight: bold;
+	color: #004b7b;
+}
+
+h4{
+	font-size: 8pt;
+	font-weight: bold;
+	color: #004b7b;
+	font-style: oblique;
+}
+
+a:hover
+{
+	color: #990000;
+	text-decoration: none;
+}
+
+#title
+{
+	background-image: url(../images/uiso_header.gif);
+	height: 86px;
+	overflow: hidden;
+	background-position:center;
+	background-repeat:no-repeat;
+}
+
+#title a
+{
+	display: block;
+	width: 780px;
+	height: 86px;
+	font-size: 0pt;
+	color: #fff;
+}
+
+#header, #footer
+{
+	 background-color: #004b7b;
+	 height: 25px;	
+}
+
+.left
+{
+	padding: 5px 5px 0px 5px;
+	float: left;	
+	color: #fff;
+	font-family: Geneva, Arial, Helvetica, sans-serif;
+	font-size: 7.5pt;
+}
+.left a
+{
+	color: #fff;	
+	padding-left: 3px;
+	padding-right: 3px;
+	text-decoration: none;
+}
+
+.right
+{
+	padding: 5px 5px 0px 0px;
+	float: right;	
+	color: #fff;
+	font-family: Geneva, Arial, Helvetica, sans-serif;
+	font-size: 7.5pt;	
+}
+.right a
+{
+	color: #fff;
+	padding-left: 3px;
+	padding-right: 3px;
+	text-decoration: none;
+}
+
+.left a:hover, .right a:hover
+{	
+	color: #ff9900;	
+}
+
+#bodycontent
+{
+	padding-left: 10px;
+	padding-right: 10px;
+	padding-top: 10px;	
+	padding-bottom: 10px;
+}
+
+.bodycontent a:hover
+{	
+	color: #000066;
+}
+
+input:focus, textarea:focus{
+background-color: #CCCCFF;
+}
+
+.ghost-text {
+	color: #aaa;
+}
+textarea {
+	
+}
+.single-line {
+	height: 20px;
+	padding: 2px 4px;
+	line-height: 20px;
+}
+.mycolor {
+	color: #4452aa;
+}
+textarea {
+	border: 1px solid #33729e;
+}
+.UTH {
+	vertical-align: middle;
+	text-align: center;
+	border: solid black 1.0pt;
+	mso-border-left-alt: solid black .5pt;
+	mso-border-alt:solid black .5pt;
+	background:#D9D9D9;
+	padding:0in 1pt 0in 1pt;	
+	font-size:8.0pt; 
+	color: #004b7b;
+	font-family:Arial,Helvetica,sans-serif;
+
+
+}
+.UTD {
+	vertical-align: middle;
+	text-align: center;
+	border: solid black 1.0pt;
+	mso-border-left-alt: solid black .5pt;
+	mso-border-alt:solid black .5pt;
+	padding:0in 5.4pt 0in 5.4pt;
+	height:18.5pt	
+	font-size:8.0pt;
+	color:windowtext;
+	font-family:Arial,Helvetica,sans-serif;
+
+}
+.Default {
+	font-size:10.0pt;
+	color:windowtext	
+	
+}
+#pup {
+    position                : fixed;
+    top                     : 30px;
+    right                   : 5px;
+    width                   : 375px;
+    padding                 : 5px;
+    font-size               : 11pt;
+    color                   : #fff;
+    background-image        : url(https://security-uiso.uis.georgetown.edu/forms/images/bg-pup.png);
+    font-family             : "courier new", tahoma, verdana, arial, sans-serif;
+    font-weight             : bold;
+    text-align              : left;
+    border                  : 2px solid #333;
+    z-index                 : 200; /* aaaalways on top*/
+}
+
+

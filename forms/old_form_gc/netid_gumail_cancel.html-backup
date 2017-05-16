@@ -1,0 +1,474 @@
+<?php
+
+function ldap_authenticate() {
+    
+    if ($_SERVER['PHP_AUTH_USER'] != "" && $_SERVER['PHP_AUTH_PW'] != "") {
+        $ds=ldap_connect("ldaps://directory.georgetown.edu");
+	ldap_set_option($ds, LDAP_OPT_PROTOCOL_VERSION, 3);
+	$netid=$_SERVER['PHP_AUTH_USER'];
+	$filter="(uid=$netid)";
+
+        $ldap_user = "uid=" . $netid . ",ou=people,dc=georgetown,dc=edu";
+#	$ldap_user = 'uid=UISOVPNReportingUIDMapping,ou=Specials,dc=georgetown,dc=edu';
+#        $ldap_pass = '7/xoFVeC1CAHOHL+n1NHhK5i15UPrk9v';
+       
+              if (ldap_bind( $ds, $ldap_user, $_SERVER['PHP_AUTH_PW']) ) {
+
+#             if (ldap_bind( $ds, $ldap_user, $ldap_pass) ) {
+        	$r = ldap_search( $ds, 'ou=people,dc=georgetown,dc=edu', $filter);
+        	if ($r) {
+            		$result = ldap_get_entries( $ds, $r);
+            		if ($result[0]) {
+                    	return $result[0];
+                }
+            }
+        }
+    }
+    header('WWW-Authenticate: Basic realm="NetID Password Authentication"');
+    header('HTTP/1.0 401 Unauthorized');
+	echo 'Your authentication has failed. Please try again.';
+    return NULL;
+}
+
+if (($result = ldap_authenticate()) == NULL) {
+    exit(0);
+}
+
+?>
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>Statusand Affiliation Change Issue Notification</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+
+		<link rel="stylesheet" type="text/css" href="css/netid_template.css" media="screen" />
+		<script src='javascript/mootools-yui-compressed.js' type='text/javascript'></script>
+		<script src='javascript/flext-uncompressed.js' type='text/javascript' ></script>
+		<script type="text/javascript">
+			function validate_required(field,alerttxt){
+       			with (field){
+         			if (value==null||value==""||value==0) {
+            			alert(alerttxt);
+            			return false;
+           			}
+        			else {
+            			return true;
+           			}
+        		}
+    		}
+			
+			function verify_submit(thisform) {
+    			with (thisform) {
+        			if (validate_required(role,"You must select a valid role type!")==false) {
+            			role.focus();
+            			return false;
+            		}
+				}
+			}
+		</script>
+
+	    <style type="text/css">
+<!--
+.style1 {color: #FF0000}
+-->
+        </style>
+</head>
+	<body>
+
+		<div id="header">
+			<div class="left"><a href="http://www.georgetown.edu/">Georgetown University</a> | <a href="http://uis.georgetown.edu/">University Information Services</a></div>
+			<div class="right"><a href="http://security.georgetown.edu/8933.html">Contact Us</a> | <a href="http://search.georgetown.edu/">Search</a> | <a href="http://explore.georgetown.edu/sites/">Site Index</a> | <a href="http://security.georgetown.edu/8934.html">About <abbr title="University NetID Services">NetID</abbr></a></div>
+		</div>
+		<div id="title">
+			<h1><a href="http://netid.georgetown.edu/">University NetID Services</a></h1>
+		</div>
+<hr />
+<br />  
+
+<? if (strlen($_POST['oncethrough']) != 0){ 
+
+include_once("sanitize.inc");
+include_once("conf/fw_db.conf");
+
+function send_email($from, $reply, $to, $cc, $subject, $message){
+        $headers = 'From: ' . $from . "\n";
+        $headers .= 'Reply-To: ' . $reply . "\n";
+		$headers .= 'CC: ' . $cc . "\n";
+        $headers .= 'Return-Path: ' . $reply . "\n";
+		$headers .= 'X-Mailer: PHP/' . phpversion() . "\n";
+        mail($to,$subject,$message,$headers);
+}
+
+function send_email_html($from, $reply, $to, $cc, $subject, $message){
+        $headers = 'From: ' . $from . "\n";
+        $headers .= 'Reply-To: ' . $reply . "\n";
+		$headers .= 'CC: ' . $cc . "\n";
+        $headers .= 'Return-Path: ' . $reply . "\n";
+		$headers .= 'X-Mailer: PHP/' . phpversion() . "\n";
+		$headers  .= 'MIME-Version: 1.0' . "\n";
+		$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\n";
+        mail($to,$subject,$message,$headers);
+}
+
+# insert the request in db
+mysql_connect($db_host,$user,$password);
+@mysql_select_db($database) or die( "Unable to select database");
+
+$netid=sanitize($_POST['netid'], SQL);
+$fullname=sanitize($_POST['fullname'], SQL);
+$email=sanitize($_POST['email'], SQL);
+$telephone=sanitize($_POST['telephone'], SQL);
+$dept=sanitize($_POST['dept'], SQL);
+$role=sanitize($_POST['role'], SQL);
+$reason=sanitize($_POST['reason'], SQL);
+$dpt_move=sanitize($_POST['dpt_move'], SQL);
+$camp_move=sanitize($_POST['camp_move'], SQL);
+$other=sanitize($_POST['other'], SQL);
+$comments=sanitize($_POST['comments'], SQL);
+
+$insert1 = "INSERT INTO netid_gumail_cancel (netid, name, email, phone, dept, role, reason, reason_comments, comments)
+            VALUES('$netid', '$fullname', '$email', '$telephone', '$dept', '$role', '$reason', '$dpt_move$camp_move$other', '$comments')";
+			
+mysql_query($insert1) or die(mysql_error());
+mysql_close();
+
+# Send Confirmation email
+$conf_to = $email;
+$conf_cc = "netid@georgetown.edu,mcl63@georgetown.edu"; #it goes to NetID and Michelle Lapin
+$conf_from = "NetID Office <netid@georgetown.edu>";
+$conf_subject = "GUMail cancellation issue - " . $netid;
+
+$conf_msg = "<html><body>Request Date: ";
+$conf_msg .= date("F j, Y, g:i a");
+$conf_msg .= "<br /><br />Your Status Affiliation Change Issue Notification has been submitted with the following information:<br /><br />
+<center>
+<table border=0 align='center' cellpadding=0 cellspacing=0 class=MsoNormalTable style='border-collapse:collapse;'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:15.5pt'>
+  <td valign=top align='center' style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>NetID</span></b></td>
+  <td valign=top align='center' style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Full Name</span></b></td>
+  <td valign=top align='center' style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Email</span></b></td>
+  <td valign=top align='center' style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Phone #</span></b></td>
+  <td valign=top align='center' style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+    <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Department #</span></b></td>
+  <td valign=top align='center' style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+    <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Role</span></b></td>
+ </tr>
+ <tr style='mso-yfti-irow:1;mso-yfti-lastrow:yes;height:19pt'>
+  <td valign=middle align='center' style='border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;
+  padding:0in 2pt 0in 2pt;height:19pt'>
+  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>" .
+      $netid . "</span>
+  </td>
+  <td valign=middle align='center' style='border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;
+  padding:0in 2pt 0in 2pt;height:19pt'>
+  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>" . 
+      $fullname . "
+    </span>
+  </td>
+  <td valign=middle align='center' style='border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;
+  padding:0in 2pt 0in 2pt;height:19pt'>
+  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>" .
+      $email . "
+    </span>
+  </td>
+  <td valign=middle align='center' style='border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;
+  padding:0in 2pt 0in 2pt;height:19pt'>
+  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>" .
+      $telephone . "
+    </span>
+  </td>
+  <td valign=middle align='center' style='border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;
+  padding:0in 2pt 0in 2pt;height:19pt'>
+  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>" .
+        $dept . "
+        </span>
+    </td>
+  <td valign=middle  align='center' style='border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;
+  padding:0in 2pt 0in 2pt;height:19pt'>
+  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>" . 
+      $role . "
+	  </span>
+    </td>
+ </tr>
+</table>
+</center>
+<br />
+Reason this is believed to be incorrect: ";
+if ($reason == "I am transferring to another department"){
+	$conf_msg .= "<i>I am transferring to another department or switching roles</i> - ";
+	$conf_msg .= $dpt_move;
+	$conf_msg .= "<br />";
+	}
+elseif ($reason == "I am a faculty member changing status"){
+	$conf_msg .= "<i>I am a faculty member changing status</i><br />";
+	}
+elseif ($reason == "I am no longer an employee, but will be an Associate with my department"){
+	$conf_msg .= "<i>I am no longer an employee, but will be an Associate with my department</i><br />";
+	}
+elseif ($reason == "I have recently been hired and received my NetID"){
+	$conf_msg .= "<i>I have recently been hired and received my NetID</i><br />";
+	}
+
+
+
+elseif ($reason == "I am transfering between campuses"){
+	$conf_msg .= "<i>I am transfering between campuses</i> - ";
+	$conf_msg .= $camp_move;
+	$conf_msg .= "<br />";
+	}
+elseif ($reason == "Other"){
+	$conf_msg .= "<i>Other</i> - ";
+	$conf_msg .= $other;
+	$conf_msg .= "<br />";
+	}
+
+if (strlen($comments) != 0){
+	$conf_msg .= "<br />Additional Comments: ";
+	$conf_msg .= $comments . "<br />";
+	}
+$conf_msg .= "<br />";
+$conf_msg .= "Please contact ";
+if ($role == "Faculty - Medical Center"){
+	$conf_msg .= "<b>the Faculty and Academic Affairs Office</b> at the Medical Center";
+	}
+elseif ($role == "Faculty - Main Campus"){
+	$conf_msg .= "<b>the Office of Faculty Records and Appointments</b> on the Main Campus";
+	}
+elseif ($role == "AAP/Staff"){
+	$conf_msg .= "<b>the Human Resources Department</b>";
+	}
+$conf_msg .= ", who can assist you in resolving this issue.<br /><br />";
+$conf_msg .= "Please let us know if you have any problems or questions.<br /><br />
+Sincerely,<br /><br />
+NetID Office<br />
+netid@georgetown.edu<br />
+202-687-2999<br /><br />";
+$conf_msg .= "Request received from " . $_SERVER['REMOTE_ADDR'];
+$conf_msg .="</body></html>";
+
+#Send email to the Help Desk to open ticket
+$hd_to = "help@georgetown.edu"; #this goes to the helpdesk help@georgetown.edu
+$hd_replyto = $email;
+$hd_from = "NetID Office <netid@georgetown.edu>";
+$hd_subject = "GUMail cancellation issue - " . $netid;
+
+$hd_msg = "Helpdesk,\n\n";
+$hd_msg .= "Please open a ticket for review of this Account Deletion Issue, and assign it to the NetID Office.\n\n";
+$hd_msg .= "User: " . $fullname . "(" . $netid . ") has requested a review of the email cancellation notice they have received.\n\n";
+$hd_msg .= "Role: " . $role . "\n\n";
+$hd_msg .= "Request Date: " . date("F j, Y, g:i a") . "\n\n";
+$hd_msg .= "Reason: ";
+
+if ($reason == "I am transferring to another department"){
+	$hd_msg .= "I am transferring to another department or switching roles - " . $dpt_move . "\n";
+	}
+elseif ($reason == "I am a faculty member changing status"){
+	$hd_msg .= "I am a faculty member changing status\n";
+	}
+elseif ($reason == "I am no longer an employee, but will be an Associate with my department"){
+	$hd_msg .= "I am no longer an employee, but will be an Associate with my department\n";
+	}
+elseif ($reason == "I have recently been hired and received my NetID"){
+	$hd_msg .= "I have recently been hired and received my NetID\n";
+	}
+
+
+
+elseif ($reason == "I am transfering between campuses"){
+	$hd_msg .= "I am transfering between campuses - " . $camp_move . "\n";
+	}
+elseif ($reason == "Other"){
+	$hd_msg .= "Other - " . $other . "\n";
+	}
+
+if (strlen($comments) != 0){
+	$hd_msg .= "\nAdditional Comments: " . $comments . "\n\n";
+	}
+$hd_msg .= "Request received from " . $_SERVER['REMOTE_ADDR'] . "\n";
+
+#Send email to the responsible department
+if ($role == "Faculty - Medical Center"){
+	$dpt_to = "medleym@georgetown.edu"; #change this to Medical Center Faculty - medleym@georgetown.edu
+	}
+elseif ($role == "Faculty - Main Campus"){
+	$dpt_to = "las38@georgetown.edu"; #change this to Main Campus Faculty - Lesley Sebastian
+	}
+elseif ($role == "AAP/Staff"){
+	$dpt_to = "netid@georgetown.edu"; #change this to AAP/Staff member
+	}
+$dpt_replyto = "NetID Office <netid@georgetown.edu>";
+$dpt_from = "NetID Office <netid@georgetown.edu>";
+$dpt_cc = "mcl63@georgetown.edu"; #change this to Michelle
+$dpt_subject = "GUMail cancellation issue - " . $netid;
+if ($role == "Faculty - Medical Center"){
+	$dpt_msg = "A member of the Medical Center faculty, " . $fullname;
+	}
+elseif ($role == "Faculty - Main Campus"){
+	$dpt_msg = "A member of the Main Campus faculty, " . $fullname;
+	}
+elseif ($role == "AAP/Staff"){
+	$dpt_msg = "An employee, " . $fullname;
+	}
+$dpt_msg .= ", has notified the NetID Office that the GUMail cancellation notice issued recently is believed to be in error. " . $fullname;
+$dpt_msg .= "  has been advised to contact your office regarding this matter.\n\n";
+if ($role == "Faculty - Medical Center"){
+	$dpt_msg .= "Please review the faculty member’s information.  If the faculty member should remain active, please notify the NetID Office immediately.  If the faculty member’s status has changed and he or she is no longer eligible for GUMail service, please advise the faculty member of the situation, and notify the NetID Office accordingly.\n\n";
+	}
+elseif ($role == "Faculty - Main Campus"){
+	$dpt_msg .= "Please review the faculty member’s information.  If the faculty member should remain active, please notify the NetID Office immediately.  If the faculty member’s status has changed and he or she is no longer eligible for GUMail service, please advise the faculty member of the situation, and notify the NetID Office accordingly.\n\n";
+	}
+elseif ($role == "AAP/Staff"){
+	$dpt_msg .= "Please review the employee’s information.  If the individual should remain active, please notify the NetID Office immediately.  If the employee’s status has changed and he or she is no longer eligible for GUMail service, please advise the individual of the situation, and notify the NetID Office accordingly.\n\n";
+	}
+$dpt_msg .= "Please let us know if you have any questions.\n\n";
+$dpt_msg .= "Sincerely,\n\n";
+$dpt_msg .= "NetID Office\n";
+$dpt_msg .= "netid@georgetown.edu\n";
+$dpt_msg .= "202-687-2999\n";
+
+
+send_email_html($conf_from, $conf_from, $conf_to, $conf_cc, $conf_subject, $conf_msg);
+send_email($hd_from, $hd_replyto, $hd_to, '', $hd_subject, $hd_msg);
+send_email($dpt_from, $dpt_replyto, $dpt_to, $dpt_cc, $dpt_subject, $dpt_msg);
+
+?>
+<center>
+Your request to keep your GUMail account has been successfuly submitted. You will receive a confirmation e-mail with further instructions.
+<br /><br />
+Please close your browser to securely logout of this system.</center><br />
+
+<?
+	}
+else
+	{ ?>
+
+<form name="gumail_cancel" action="netid_gumail_cancel.html" method="post" onSubmit="return verify_submit(this)">
+<div id="bodycontent">
+<?php 
+	include_once("sanitize.inc");
+	$netid = sanitize($_SERVER['PHP_AUTH_USER'], SQL);
+	
+	$dn = "ou=people,dc=georgetown,dc=edu";
+	$filter="(uid=$netid)";
+	$justthese = array("cn", "telephonenumber", "mail", "departmentnumber", "title");
+        
+        $ldap_user = "uid=" . $netid . ",ou=people,dc=georgetown,dc=edu";
+#	$ldap_user = 'uid=UISOVPNReportingUIDMapping,ou=Specials,dc=georgetown,dc=edu';
+#        $ldap_pass = '7/xoFVeC1CAHOHL+n1NHhK5i15UPrk9v';
+
+	$ds=ldap_connect("ldaps://directory.georgetown.edu");
+        if (ldap_bind( $ds, $ldap_user, $_SERVER['PHP_AUTH_PW']) ) {
+#	if (ldap_bind( $ds, $ldap_user, $ldap_pass) ) {
+		$sr=ldap_search($ds, $dn, $filter, $justthese);
+		$info = ldap_get_entries($ds, $sr);
+		$fullname = $info[0]['cn'][0];
+		$telephone = $info[0]['telephonenumber'][0];
+		$email = $info[0]['mail'][0];
+		$deptnum = $info[0]['departmentnumber'][0];
+		$title = $info[0]['title'][0];
+		ldap_close($ds);
+	}
+	
+?>
+	<h1>Status Affiliation Change Issue Notification</h1>
+	<br />
+
+<table border=0 align="center" cellpadding=0 cellspacing=0 class=MsoNormalTable style='border-collapse:collapse;'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:15.5pt'>
+  <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>NetID</span></b></td>
+  <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Full Name</span></b></td>
+  <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Email</span></b></td>
+  <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Phone #</span></b></td>
+  <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+    <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Department #</span></b></td>
+  <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+    <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Role <span class="style1">(required)</span> </span></b></td>
+ </tr>
+ <tr style='mso-yfti-irow:1;mso-yfti-lastrow:yes;height:19pt'>
+  <td valign=middle align="center" style='border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;
+  padding:0in 2pt 0in 2pt;height:19pt'>
+  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+      <input type="text" name="netid" id="netid" size="10" value="<? echo $netid; ?>">
+    </span>
+  </td>
+  <td valign=middle align="center" style='border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;
+  padding:0in 2pt 0in 2pt;height:19pt'>
+  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+      <input type="text" name="fullname" id="fullname" size="20" value="<? echo $fullname; ?>">
+    </span>
+  </td>
+  <td valign=middle align="center" style='border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;
+  padding:0in 2pt 0in 2pt;height:19pt'>
+  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+      <input type="text" name="email" id="email" size="24" value="<? echo $email; ?>">
+    </span>
+  </td>
+  <td valign=middle align="center" style='border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;
+  padding:0in 2pt 0in 2pt;height:19pt'>
+  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+      <input type="text" name="telephone" id="telephone" size="12" value="<? echo $telephone; ?>">
+    </span>
+  </td>
+  <td valign=middle align="center" style='border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;
+  padding:0in 2pt 0in 2pt;height:19pt'>
+  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+        <input type="text" name="dept" id="dept" size="5" value="<? echo $deptnum ?>">
+        </span>
+    </td>
+  <td valign=middle  align="center" style='border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;
+  padding:0in 2pt 0in 2pt;height:19pt'>
+  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+      <select name="role">
+	  	<option selected="selected"></option>
+        <option value="Faculty - Main Campus">Faculty - Main Campus</option>
+        <option value="Faculty - Medical Center">Faculty - Medical Center</option>
+        <option value="AAP/Staff">AAP/Staff</option>
+      </select>
+	  </span>
+    </td>
+ </tr>
+</table>
+<br />
+
+<p><h3>Please indicate the reason you believe this notice was received in error:</h3></p><br />
+
+&nbsp;&nbsp;<input type="radio" name="reason" checked="checked" value="I am transferring to another department" /> I am transferring to another department or switching roles. <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b> Please describe the change you are making. Include old and new departments, supervisors, and effective date.</b><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<center><textarea class='flext growme' name="dpt_move" cols="60" rows="3"></textarea></center><br />
+&nbsp;&nbsp;<input type="radio" name="reason" value="I am a faculty member changing status" /> I am a faculty member changing status. <br />
+&nbsp;&nbsp;<input type="radio" name="reason" value="I am no longer an employee, but will be an Associate with my department" /> I am no longer an employee, but will be an Affiliate with my department.<br />
+&nbsp;&nbsp;<input type="radio" name="reason" value="I have recently been hired and received my NetID" /> I have recently been hired and received my NetID.<br />
+
+&nbsp;&nbsp;<input type="radio" name="reason" value="I am transfering between campuses" /> I am transfering between campuses.<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b> Please enter your New Campus Name and effective date.</b><i></i><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<center><textarea class='flext growme' name="camp_move" cols="60" rows="3"></textarea></center><br />
+&nbsp;&nbsp;<input type="radio" name="reason" value="Other" /> Other (please explain below).<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<center><textarea class='flext growme' name="other" cols="60" rows="3"></textarea></center><br />
+
+<p><h3>Please enter any additional comments:</h3></p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<center><textarea class='flext growme' name="comments" cols="60" rows="3"></textarea></center><br />
+
+<p class=Default align=center style='text-align:center'><b><span style='color:windowtext'>
+<input type="submit" name ="submit" value ="Submit">
+<input type="reset" name="Clear"></span></b></p>
+<input type="hidden" name="oncethrough" value="Yes">
+<p><font color="#000000" size="2"><b>AAP/Staff:</b> If you have been a Staff member or AAP and believe that you are continuing in the status of employee affiliate, <b>please contact Human Resources as soon as possible</b> for information on the steps to re-activate your status.</font></p>
+<p><font color="#000000" size="2"><b>Faculty:</b> If you have been a Faculty member and believe that you are continuing in that status, please contact <b>the Office of Faculty Records and Appointments</b> on the Main Campus, or <b>the Faculty and Academic Affairs Office</b> at the Medical Center as soon as possible for informaiton on the steps to re-activate your status.</font></p>
+	</div>
+	</form> <? } ?>
+	<div id="footer">
+		<div class="left"><a href="http://www.georgetown.edu/">Georgetown University</a> | <a href="http://uis.georgetown.edu/">University Information Services</a></div>
+		<div class="right"><a href="http://security.georgetown.edu/8933.html">Contact Us</a> | <a href="http://search.georgetown.edu/">Search</a> | <a href="http://explore.georgetown.edu/sites/">Site Index</a> | <a href="http://security.georgetown.edu/8934.html">About <abbr title="University NetID Services">NetID</abbr></a></div>
+		</div>
+	</body>
+</html> 

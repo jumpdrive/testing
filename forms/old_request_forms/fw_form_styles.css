@@ -1,0 +1,629 @@
+/* Set element style defaults so that they are consistent across browsers */
+
+html, div, ul, ol, dl, dd, dt, menu, dir, blockquote, h1, h2, h3, h4, h5, h6, form, pre, fieldset 
+{ 
+	margin: 0px; 
+	padding: 0px; 
+	font-weight: normal; 
+	font-size: 1em; 
+	text-indent: 0px; 
+	font-style: normal; 
+}
+img { margin: 0px; padding: 0px; border-width: 0px; position:absolute; }
+abbr, acronym { border-width: 0px; }
+a img
+{
+	border-width: 0px;
+}
+a
+{
+	color: #000066;
+	text-decoration: inherit;
+}
+#middle-column li
+{
+	margin-left: 30px;
+}
+#middle-column p
+{
+	margin-top: 1em;
+	margin-bottom: 1em;
+}
+#header .left, #footer .left
+{
+	float: left;
+}
+#header .right, #footer .right
+{
+	float: right;
+}
+#navigation li
+{
+	display: inline;
+}
+
+/* Set up the default layout */
+
+html 
+{
+	background-color: #ececec;
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+}
+
+body
+{
+	background-color: #fff;	
+	width: 900px;
+	border: 1px solid #004b7b;
+	font-size: 10pt;
+	margin-top: 20px;
+	margin-left: auto;
+	margin-right: auto;
+	position: relative;
+}
+
+li
+{	font-size: 9pt;
+	font-family: Arial, Helvetica, sans-serif;
+	color: #666666;
+	color:windowtext;
+	text-align:left;
+	margin-left:20px;
+}
+
+p {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	color: #004b7b;
+	font-weight: normal;
+}
+
+h1
+{
+	font-size: 11pt;
+ 	font-weight: bold;
+ 	color: #004b7b;
+	padding-bottom: 10px;
+}
+
+h2
+{
+	font-size: 9pt;
+	font-weight: bold;
+	color: #c76d00;
+	padding-bottom: 5px;
+}
+
+h3{ 
+	font-size: 8pt;
+	font-weight: bold;
+	color: #004b7b;
+}
+
+h4{
+	font-size: 8pt;
+	font-weight: bold;
+	color: #004b7b;
+	font-style: oblique;
+}
+
+a:hover
+{
+	color: #990000;
+	text-decoration: none;
+}
+
+#title
+{
+	background-image: url(../images/uiso_header.gif);
+	height: 86px;
+	overflow: hidden;
+	background-position:center;
+	background-repeat:no-repeat;
+}
+
+#title a
+{
+	display: block;
+	width: 780px;
+	height: 86px;
+	font-size: 0pt;
+	color: #fff;
+}
+
+#header, #footer
+{
+	 background-color: #004b7b;
+	 height: 25px;	
+}
+
+.left
+{
+	padding: 5px 5px 0px 5px;
+	float: left;	
+	color: #fff;
+	font-family: Geneva, Arial, Helvetica, sans-serif;
+	font-size: 7.5pt;
+}
+.left a
+{
+	color: #fff;	
+	padding-left: 3px;
+	padding-right: 3px;
+	text-decoration: none;
+}
+
+.right
+{
+	padding: 5px 5px 0px 0px;
+	float: right;	
+	color: #fff;
+	font-family: Geneva, Arial, Helvetica, sans-serif;
+	font-size: 7.5pt;	
+}
+.right a
+{
+	color: #fff;
+	padding-left: 3px;
+	padding-right: 3px;
+	text-decoration: none;
+}
+
+.left a:hover, .right a:hover
+{	
+	color: #ff9900;	
+}
+
+#bodycontent
+{
+	padding-left: 10px;
+	padding-right: 10px;
+	padding-top: 10px;	
+	padding-bottom: 10px;
+}
+
+.bodycontent a:hover
+{	
+	color: #000066;
+}
+
+input:focus, textarea:focus{
+background-color: #CCCCFF;
+}
+
+.ghost-text {
+	color: #aaa;
+}
+textarea {
+	
+}
+.single-line {
+	height: 20px;
+	padding: 2px 4px;
+	line-height: 20px;
+}
+.mycolor {
+	color: #4452aa;
+}
+textarea {
+	border: 1px solid #33729e;
+}
+.UTH {
+	vertical-align: middle;
+	text-align: center;
+	border: solid black 1.0pt;
+	mso-border-left-alt: solid black .5pt;
+	mso-border-alt:solid black .5pt;
+	background:#D9D9D9;
+	padding:0in 1pt 0in 1pt;	
+	font-size:8.0pt; 
+	color: #004b7b;
+	font-family:Arial,Helvetica,sans-serif;
+
+
+}
+.UTD {
+	vertical-align: middle;
+	text-align: center;
+	border: solid black 1.0pt;
+	mso-border-left-alt: solid black .5pt;
+	mso-border-alt:solid black .5pt;
+	padding:0in 5.4pt 0in 5.4pt;
+	height:18.5pt	
+	font-size:8.0pt;
+	color:windowtext;
+	font-family:Arial,Helvetica,sans-serif;
+
+}
+.Default {
+	font-size:10.0pt;
+	color:windowtext	
+	
+}
+#pup {
+    position                : fixed;
+    top                     : 30px;
+    right                   : 5px;
+    width                   : 375px;
+    padding                 : 5px;
+    font-size               : 11pt;
+    color                   : #fff;
+    background-image        : url(https://security-uiso.uis.georgetown.edu/forms/images/bg-pup.png);
+    font-family             : "courier new", tahoma, verdana, arial, sans-serif;
+    font-weight             : bold;
+    text-align              : left;
+    border                  : 2px solid #333;
+    z-index                 : 200; /* aaaalways on top*/
+}
+
+/* ######### CSS for Shade Tabs. Remove if not using ######### */
+
+.shadetabs{
+padding: 3px 0;
+margin-left: 0;
+margin-top: 1px;
+margin-bottom: 0;
+font: bold 12px Verdana;
+list-style-type: none;
+text-align: left; /*set to left, center, or right to align the menu as desired*/
+}
+
+.shadetabs li{
+display: inline;
+margin: 0;
+}
+
+.shadetabs li a{
+text-decoration: none;
+position: relative;
+z-index: 1;
+padding: 3px 7px;
+margin-right: 3px;
+border: 1px solid #778;
+color: #2d2b2b;
+background: white url(../images/shade.gif) top left repeat-x;
+}
+
+.shadetabs li a:visited{
+color: #2d2b2b;
+}
+
+.shadetabs li a:hover{
+text-decoration: underline;
+color: #2d2b2b;
+}
+
+.shadetabs li a.selected{ /*selected main tab style */
+position: relative;
+top: 1px;
+}
+
+.shadetabs li a.selected{ /*selected main tab style */
+background-image: url(../images/shadeactive.gif);
+border-bottom-color: white;
+}
+
+.shadetabs li a.selected:hover{ /*selected main tab style */
+text-decoration: none;
+}
+
+
+/* ######### CSS for Inverted Modern Bricks II Tabs. Remove if not using ######### */
+
+.modernbricksmenu2{
+padding: 0;
+width: 362px;
+border-top: 5px solid #D25A0B; /*Brown color theme*/ 
+background: transparent;
+voice-family: "\"}\"";
+voice-family: inherit;
+}
+
+.modernbricksmenu2 ul{
+margin:0;
+margin-left: 10px; /*margin between first menu item and left browser edge*/
+padding: 0;
+list-style: none;
+}
+
+.modernbricksmenu2 li{
+display: inline;
+margin: 0 2px 0 0;
+padding: 0;
+text-transform:uppercase;
+}
+
+.modernbricksmenu2 a{
+float: left;
+display: block;
+font: bold 11px Arial;
+color: white;
+text-decoration: none;
+margin: 0 1px 0 0; /*Margin between each menu item*/
+padding: 5px 10px;
+background-color: black; /*Brown color theme*/ 
+border-top: 1px solid white;
+}
+
+.modernbricksmenu2 a:hover{
+background-color: #D25A0B; /*Brown color theme*/ 
+color: white;
+}
+
+.modernbricksmenu2 a.selected{ /*currently selected tab*/
+background-color: #D25A0B; /*Brown color theme*/ 
+color: white;
+border-color: #D25A0B; /*Brown color theme*/ 
+}
+
+/* ######### CSS for Indented CSS Tabs. Remove if not using ######### */
+
+
+.indentmenu{
+font: bold 13px Arial;
+width: 100%; /*leave this value as is in most cases*/
+}
+
+.indentmenu ul{
+margin: 0;
+padding: 0;
+float: left;
+/* width: 80%; width of menu*/
+border-top: 1px solid darkred; /*darkred border*/
+background: black url(../images/indentbg.gif) center center repeat-x;
+}
+
+.indentmenu ul li{
+display: inline;
+}
+
+.indentmenu ul li a{
+float: left;
+color: black; /*text color*/
+padding: 3px 11px;
+text-decoration: none;
+border-right: 1px solid darkred; /*darkred divider between menu items*/
+}
+
+.indentmenu ul li a:visited{
+color: black;
+}
+
+.indentmenu ul li a.selected{
+color: black !important;
+padding-top: 4px; /*shift text down 1px*/
+padding-bottom: 2px;
+background: black url(../images/indentbg2.gif) center center repeat-x;
+}
+
+/* Misc. CSS */
+
+#thtext
+{
+    text-align:center;
+    font-size:8.0pt;
+    color: #004b7b;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+div.container
+{
+    border:1px solid gray;
+    width:94%; margin-bottom: 1em;
+    margin-left: 1em;
+    padding: 10px
+}
+
+TABLE#extincss_0{border-collapse:collapse;}
+TR#extincss_1{mso-yfti-irow:0;mso-yfti-firstrow:yes;height:15.5pt}
+TD#extincss_2{border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt}
+SPAN#extincss_3{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_4{border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt}
+SPAN#extincss_5{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_6{border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt}
+SPAN#extincss_7{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_8{border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt}
+SPAN#extincss_9{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_10{border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt}
+SPAN#extincss_11{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TR#extincss_12{mso-yfti-irow:1;mso-yfti-lastrow:yes;height:19pt}
+TD#extincss_13{border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;
+  padding:0in 2pt 0in 2pt;height:19pt}
+SPAN#extincss_14{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_15{border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;
+  padding:0in 2pt 0in 2pt;height:19pt}
+SPAN#extincss_16{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_17{border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;
+  padding:0in 2pt 0in 2pt;height:19pt}
+SPAN#extincss_18{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_19{border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;
+  padding:0in 2pt 0in 2pt;height:19pt}
+SPAN#extincss_20{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_21{border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;
+  padding:0in 2pt 0in 2pt;height:19pt}
+SPAN#extincss_22{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TABLE#extincss_23{width:95%;border-collapse:collapse;mso-padding-alt:0in 1.0pt 0in 1.0pt}
+TD#extincss_24{width:24.25pt;border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;}
+SPAN#extincss_25{color:windowtext}
+TD#extincss_26{border:solid black 1.0pt;border-left:none;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 1pt 0in 1pt;}
+SPAN#extincss_27{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_28{border:solid black 1.0pt;border-left:none;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;}
+SPAN#extincss_29{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_30{border:solid black 1.0pt;border-left:none;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;}
+SPAN#extincss_31{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_32{border:solid black 1.0pt;border-left:none;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 1.0pt 0in 1.0pt;h}
+SPAN#extincss_33{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_34{border:solid black 1.0pt;border-left:none;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 1.0pt 0in 1.0pt;}
+SPAN#extincss_35{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_36{border:solid black 1.0pt;border-left:none;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;}
+SPAN#extincss_37{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_38{border:solid black 1.0pt;border-left:none;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 1.0pt 0in 1.0pt;}
+SPAN#extincss_39{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TR#extincss_40{mso-yfti-irow:1;height:19.0pt}
+TD#extincss_41{border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:19.0pt}
+SPAN#extincss_42{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_43{border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:19.0pt}
+SPAN#extincss_44{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_45{width:91.25pt;border-top:none;border-left:none;
+  border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;mso-border-top-alt:
+  solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:19.0pt}
+SPAN#extincss_46{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_47{border-top:none;border-left:none;
+  border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;mso-border-top-alt:
+  solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:19.0pt}
+SPAN#extincss_48{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_49{border-top:none;border-left:none;
+  border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;mso-border-top-alt:
+  solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;
+  padding:0in 1.0pt 0in 1.0pt;height:19.0pt}
+SPAN#extincss_50{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_51{border-top:none;border-left:none;
+  border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;mso-border-top-alt:
+  solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;
+  padding:0in 1.0pt 0in 1.0pt;height:19.0pt}
+SPAN#extincss_52{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_53{border-top:none;border-left:none;
+  border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;mso-border-top-alt:
+  solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:19.0pt}
+SPAN#extincss_54{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_55{border-top:none;border-left:none;
+  border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;mso-border-top-alt:
+  solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;
+  padding:0in 1.0pt 0in 1.0pt;height:19.0pt}
+SPAN#extincss_56{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TR#extincss_57{mso-yfti-irow:2;height:18.5pt}
+TD#extincss_58{width:24.25pt;border:solid black 1.0pt;border-top:none;
+  mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:18.5pt}
+SPAN#extincss_59{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_60{border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt}
+SPAN#extincss_61{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_62{border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt}
+SPAN#extincss_63{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_64{border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt}
+SPAN#extincss_65{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_66{border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt}
+SPAN#extincss_67{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_68{border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 1.0pt 0in 1.0pt;height:18.5pt}
+SPAN#extincss_69{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_70{border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;mso-border-top-alt:
+  solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;height:19.0pt}
+SPAN#extincss_71{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_72{border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 1.0pt 0in 1.0pt;height:18.5pt}
+SPAN#extincss_73{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TR#extincss_74{mso-yfti-irow:2;height:18.5pt}
+TD#extincss_75{width:24.25pt;border:solid black 1.0pt;border-top:none;
+  mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:18.5pt}
+SPAN#extincss_76{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_77{border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt}
+SPAN#extincss_78{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_79{border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt}
+SPAN#extincss_80{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_81{border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt}
+SPAN#extincss_82{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_83{border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt}
+SPAN#extincss_84{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_85{border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 1.0pt 0in 1.0pt;height:18.5pt}
+SPAN#extincss_86{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_87{border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;mso-border-top-alt:
+  solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;height:19.0pt}
+SPAN#extincss_88{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_89{border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 1.0pt 0in 1.0pt;height:18.5pt}
+SPAN#extincss_90{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TR#extincss_91{mso-yfti-irow:2;height:18.5pt}
+TD#extincss_92{width:24.25pt;border:solid black 1.0pt;border-top:none;
+  mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:18.5pt}
+SPAN#extincss_93{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_94{border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt}
+SPAN#extincss_95{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_96{border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt}
+SPAN#extincss_97{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_98{border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt}
+SPAN#extincss_99{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_100{border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt}
+SPAN#extincss_101{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_102{border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 1.0pt 0in 1.0pt;height:18.5pt}
+SPAN#extincss_103{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_104{border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;mso-border-top-alt:
+  solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;height:19.0pt}
+SPAN#extincss_105{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_106{border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 1.0pt 0in 1.0pt;height:18.5pt}
+SPAN#extincss_107{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TR#extincss_108{mso-yfti-irow:2;height:18.5pt}
+TD#extincss_109{width:24.25pt;border:solid black 1.0pt;border-top:none;
+  mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:18.5pt}
+SPAN#extincss_110{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_111{border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt}
+SPAN#extincss_112{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_113{border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt}
+SPAN#extincss_114{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_115{border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt}
+SPAN#extincss_116{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_117{border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt}
+SPAN#extincss_118{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_119{border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 1.0pt 0in 1.0pt;height:18.5pt}
+SPAN#extincss_120{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_121{border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;mso-border-top-alt:
+  solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;height:19.0pt}
+SPAN#extincss_122{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_123{border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 1.0pt 0in 1.0pt;height:18.5pt}
+SPAN#extincss_124{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TR#extincss_125{mso-yfti-irow:2;height:18.5pt}
+TD#extincss_126{width:24.25pt;border:solid black 1.0pt;border-top:none;
+  mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;
+  padding:0in 5.4pt 0in 5.4pt;height:18.5pt}
+SPAN#extincss_127{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_128{border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt}
+SPAN#extincss_129{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_130{border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt}
+SPAN#extincss_131{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_132{border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt}
+SPAN#extincss_133{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_134{border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt}
+SPAN#extincss_135{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_136{border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 1.0pt 0in 1.0pt;height:18.5pt}
+SPAN#extincss_137{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_138{border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;mso-border-top-alt:
+  solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;height:19.0pt}
+SPAN#extincss_139{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+TD#extincss_140{border-top:none;border-left:none;border-bottom:solid black 1.0pt;border-right:solid black 1.0pt;
+  mso-border-top-alt:solid black .5pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 1.0pt 0in 1.0pt;height:18.5pt}
+SPAN#extincss_141{text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;}
+SPAN#extincss_142{text-align:left;font-size:10.0pt;font-family:Arial,Helvetica,sans-serif;}
+P#extincss_143{text-align:center}
+SPAN#extincss_144{color:windowtext}

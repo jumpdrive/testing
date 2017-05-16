@@ -1,0 +1,426 @@
+<?php
+
+function ldap_authenticate() {
+    
+    if ($_SERVER['PHP_AUTH_USER'] != "" && $_SERVER['PHP_AUTH_PW'] != "") {
+        $ds=ldap_connect("ldaps://directory.georgetown.edu");
+	ldap_set_option($ds, LDAP_OPT_PROTOCOL_VERSION, 3);
+	$netid=$_SERVER['PHP_AUTH_USER'];
+	$filter="(|(uid=$netid))";
+	$ldap_user = "uid=" . $netid . ",ou=people,dc=georgetown,dc=edu";
+        if (ldap_bind( $ds, $ldap_user, $_SERVER['PHP_AUTH_PW']) ) {
+        	$r = ldap_search( $ds, 'ou=people,dc=georgetown,dc=edu', $filter);
+        	if ($r) {
+            		$result = ldap_get_entries( $ds, $r);
+            		if ($result[0]) {
+                    	return $result[0];
+                }
+            }
+        }
+    }
+    header('WWW-Authenticate: Basic realm="NetID Password Authentication"');
+    header('HTTP/1.0 401 Unauthorized');
+	echo 'Your authentication has failed. Please try again.';
+    return NULL;
+}
+
+if (($result = ldap_authenticate()) == NULL) {
+    exit(0);
+}
+
+?>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>Server Registration Form</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+	<link rel="stylesheet" type="text/css" href="css/template.css" media="screen" />
+	<script type="text/javascript">
+function validate_required(field)
+	{
+          with (field)
+	  {
+		if (field.value==null||field.value==""||field.value==0)
+		  {
+		    return false;
+		  }
+		else
+		  {
+		    return true;
+		  }
+          }
+	}
+function verify_submit(regForm)
+	{
+	  if (validate_required(document.regForm.dept)==false)
+		{
+		  alert('Please fill out your Department Name!');
+		  document.regForm.dept.focus();
+		  return false;
+		}
+	 if (validate_required(document.regForm.fqdn_name)==false)
+		{
+		  alert('Please fill out the Server FQDN or Name!');
+		  document.regForm.fqdn_name.focus();
+		  return false;
+		}
+      if (validate_required(document.regForm.ip_add)==false)
+		{
+		  alert('Please fill out the server IP Address!');
+          document.regForm.ip_add.focus();
+          return false;
+		}
+	  if (validate_required(document.regForm.os_type)==false)
+		{
+          alert('Please specify the Server Operating System!');
+		  document.regForm.os_type.focus();
+          return false;
+		}
+      if (validate_required(document.regForm.serv_add)==false)
+		{
+          alert('Please specify the server physical location!');
+		  document.regForm.serv_add.focus();
+          return false;
+		}
+	  if (validate_required(document.regForm.grp_email)==false)
+		{
+          alert('Please specify the Group E-mail address!');
+		  document.regForm.grp_email.focus();
+          return false;
+		}
+	}
+</script>
+</head>
+<body>
+	<div id="header">
+		<div class="left"><a href="http://www.georgetown.edu/">Georgetown University</a> | <a href="http://uis.georgetown.edu/">University Information Services</a></div>
+		<div class="right"><a href="http://security.georgetown.edu/8933.html">Contact Us</a> | <a href="http://search.georgetown.edu/">Search</a> | <a href="http://explore.georgetown.edu/sites/">Site Index</a> | <a href="http://security.georgetown.edu/8934.html">About <abbr title="University Information Security Office">UISO</abbr></a></div>
+	</div>
+	<div id="title">
+		<h1><a href="http://security.georgetown.edu/">University Information Security Office</a></h1>
+	</div>
+<hr />
+<br />
+ 
+<h1>Server Registration Form</h1>
+
+<div align="center"; id="bodycontent">
+
+<? if (strlen($_POST['oncethrough']) != 0){ 
+		include_once("sanitize.inc");
+?>
+<form method="POST" name="regForm" action="server_register.html">
+	
+  <table border=0 align="center" cellpadding=0 cellspacing=0 class=MsoNormalTable style='border-collapse:collapse;'>
+	<tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:15.5pt'>
+	 <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+	  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Name</span></b></td>
+	 <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+	  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Phone#</span></b></td>
+	 <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+	  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Email</span></b></td>
+	 <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+	  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Department</span></b></td>
+	</tr>
+	<tr style='mso-yfti-irow:1;mso-yfti-lastrow:yes;height:19pt'>
+	 <td valign=middle align="center" style='border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt; padding:0in 2pt 0in 2pt;height:19pt'>
+          <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+		  <? echo sanitize($_POST['req_name'], SQL); ?></span>
+		  <input type="hidden" name="req_name" value="<? echo sanitize($_POST['req_name'], SQL); ?>">
+         </td>
+         <td valign=middle align="center" style='border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt; padding:0in 2pt 0in 2pt;height:19pt'>
+          <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+		<? echo sanitize($_POST['phone'], SQL); ?></span>
+		  <input type="hidden" name="phone" value="<? echo sanitize($_POST['phone'], SQL); ?>">
+         </td>
+         <td valign=middle align="center" style='border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt; padding:0in 2pt 0in 2pt;height:19pt'>
+          <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+		<? echo sanitize($_POST['email'], SQL); ?></span>
+		  <input type="hidden" name="email" value="<? echo sanitize($_POST['email'], SQL); ?>">
+         </td>
+         <td valign=middle align="center" style='border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt; padding:0in 2pt 0in 2pt;height:19pt'>
+          <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+		<? echo sanitize($_POST['dept'], SQL); ?></span>
+		  <input type="hidden" name="dept" value="<? echo sanitize($_POST['dept'], SQL); ?>">
+         </td>
+	</tr>
+  </table>
+  
+<br />
+
+<h2 align="center">Server Information:</h2>
+
+<table border=0 align="center" cellpadding=0 cellspacing=0 class=MsoNormalTable style='border-collapse:collapse;'>
+	<tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:15.5pt'>
+	 <td valign=top align="left" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+	  <b><span style='text-align:left;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>FQDN/Name</span></b></td>
+	 <td valign=top align="left" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;padding:0in 2pt 0in 2pt;height:15.5pt'>
+	  <span style='text-align:left;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+		<? echo sanitize($_POST['fqdn_name'], SQL); ?></span>
+		  <input type="hidden" name="fqdn_name" value="<? echo sanitize($_POST['fqdn_name'], SQL); ?>">
+	 </td>
+	</tr>
+	<tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:15.5pt'>
+	 <td valign=top align="left" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+	  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>IP Address</span></b></td>
+	 <td valign=top align="left" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;padding:0in 2pt 0in 2pt;height:15.5pt'>
+	  <span style='text-align:left;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+		<? echo sanitize($_POST['ip_add'], SQL); ?></span>
+		  <input type="hidden" name="ip_add" value="<? echo sanitize($_POST['ip_add'], SQL); ?>">
+         </td>
+	</tr>
+	<tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:15.5pt'>
+	 <td valign=top align="left" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+	  <b><span style='text-align:left;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Operating System</span></b></td>
+	 <td valign=top align="left" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;padding:0in 2pt 0in 2pt;height:15.5pt'>
+	  <span style='text-align:left;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+	<? echo sanitize($_POST['os_type'], SQL); ?></span>
+		  <input type="hidden" name="os_type" value="<? echo sanitize($_POST['os_type'], SQL); ?>">
+	 </td>
+	 <tr>
+    <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:15.5pt'>
+	 <td valign=top align="left" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+	  <b><span style='text-align:left;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Physical Location</span></b></td>
+	 <td valign=top align="left" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;padding:0in 2pt 0in 2pt;height:15.5pt'>
+	  <span style='text-align:left;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+	  <? echo sanitize($_POST['serv_add'], SQL); ?></span>
+		  <input type="hidden" name="serv_add" value="<? echo sanitize($_POST['serv_add'], SQL); ?>">
+	 </td>
+	</tr>
+	    <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:15.5pt'>
+	 <td valign=top align="left" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+	  <span style='text-align:left;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'><b>Group E-mail</b><br />(Unit E-mail Address)</span></td>
+	 <td valign=top align="left" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;padding:0in 2pt 0in 2pt;height:15.5pt'>
+	  <span style='text-align:left;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+	  <? echo sanitize($_POST['grp_email'], SQL); ?></span>
+		  <input type="hidden" name="grp_email" value="<? echo sanitize($_POST['grp_email'], SQL); ?>">
+	 </td>
+	</tr>
+</table>
+
+<br />
+
+<h2 align="center">Additional Comments:</h2>
+
+<textarea name="comments" class='flext growme' cols="50" rows="1" readonly="readonly"><? echo sanitize($_POST['comments'], SQL); ?></textarea>
+<input type="hidden" name="comments" value="<? echo sanitize($_POST['comments'], SQL); ?>">
+<br /><br />
+
+<input type="button" value ="Back" onClick="history.go(-1)">
+<input type="submit" name ="submit" value="Submit">
+<input type="hidden" name="twicethrough" value="Yes">
+<input type="hidden" name="netID" value="<? echo sanitize($_POST['netID'], SQL); ?>" />
+</form>
+<? }
+
+elseif (strlen($_POST['twicethrough']) != 0) {
+
+include_once("conf/serv_db.conf");
+include_once("sanitize.inc");
+
+# insert record in db
+mysql_connect($db_host,$user,$password);
+@mysql_select_db($database) or die( "Unable to select database");
+
+	$netid=sanitize($_POST['netID'], SQL);
+	$fullname=sanitize($_POST['req_name'], SQL);
+	$phone=sanitize($_POST['phone'], SQL);
+	$email=sanitize($_POST['email'], SQL);
+	$dept=sanitize($_POST['dept'], SQL);
+	$fqdn=sanitize($_POST['fqdn_name'], SQL);
+	$ip_add=sanitize($_POST['ip_add'], SQL);
+	$os_type=sanitize($_POST['os_type'], SQL);
+	$serv_loc=sanitize($_POST['serv_add'], SQL);
+	$grp_email=sanitize($_POST['grp_email'], SQL);
+	$comments=sanitize($_POST['comments'], SQL);
+
+	$insert1 = "INSERT INTO server_reg (netid, fullname, phone, email, dept, fqdn, ip_add, os_type, serv_loc, grp_email, comments)
+                VALUES('$netid', '$fullname', '$phone', '$email', '$dept', '$fqdn', '$ip_add', '$os_type', '$serv_loc', '$grp_email', '$comments')";
+		mysql_query($insert1) or die("There was an error with your request, please contact UISO!");
+		
+mysql_close();
+
+function send_email($from, $reply, $to, $subject, $message){
+        $headers = 'From: ' . $from . "\n";
+        $headers .= 'Reply-To: ' . $reply . "\n";
+        $headers .= 'Return-Path: ' . $reply . "\n";
+		$headers .= 'X-Mailer: PHP/' . phpversion() . "\n";
+        mail($to,$subject,$message,$headers);
+}
+
+$rt_to = "uiso-request@georgetown.edu"; #send it to RT
+$rt_from = $email;
+$rt_replyto = $email;
+$rt_subject = "Server Review - " . $netid;
+
+$rt_msg .= "X-RequestType:Server Review" . "\n";
+$rt_msg .= "Requester: " . $fullname . "\n";
+$rt_msg .= "Phone: " . $phone . "\n";
+$rt_msg .= "E-mail: " . $email . "\n";
+$rt_msg .= "Department: " . $dept . "\n";
+$rt_msg .= "Group Email: " . $grp_email . "\n\n";
+
+$rt_msg .= "Server FQDN: " . $fqdn . "\n";
+$rt_msg .= "Server IP Address: " . $ip_add . "\n";
+$rt_msg .= "Server OS: " . $os_type . "\n";
+$rt_msg .= "Server Location: " . $serv_loc . "\n\n";
+
+$rt_msg .= "Comments: " . $comments . "\n";
+$rt_msg .= "Request Received From: " . $_SERVER['REMOTE_ADDR'] . "\n";
+
+send_email($rt_from, $rt_replyto, $rt_to, $rt_subject, $rt_msg);
+
+?>
+
+Thank you for registering your system with the University Information Security Office. You will be contacted shortly to perform a Server Security Review.
+<br /><br />
+<a href="server_register.html">Click here</a> to register another server.
+
+<?
+	}
+else
+	{ ?>
+<div id="bodycontent">
+
+<?php 
+	include_once("sanitize.inc");
+	$netid = sanitize($_SERVER['PHP_AUTH_USER'], SQL); 
+	$ldap_user = "uid=" . $netid . ",ou=people,dc=georgetown,dc=edu";
+	
+	$dn = "ou=people,dc=georgetown,dc=edu";
+	$filter="(|(uid=$netid))";
+	$justthese = array("cn", "telephonenumber", "mail");
+
+	$ds=ldap_connect("ldaps://directory.georgetown.edu");
+	if (ldap_bind( $ds, $ldap_user, $_SERVER['PHP_AUTH_PW'])) {
+		$sr=ldap_search($ds, $dn, $filter, $justthese);
+		$info = ldap_get_entries($ds, $sr);
+		$fullname = $info[0]['cn'][0];
+		$telephone = $info[0]['telephonenumber'][0];
+		$email = $info[0]['mail'][0];
+		ldap_close($ds);
+	}
+	
+?>
+
+<form onSubmit="return verify_submit(regForm);" method="POST" name="regForm" action="server_register.html">
+	
+  <table border=0 align="center" cellpadding=0 cellspacing=0 class=MsoNormalTable style='border-collapse:collapse;'>
+	<tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:15.5pt'>
+	 <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+	  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Name</span></b></td>
+	 <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+	  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Phone#</span></b></td>
+	 <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+	  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Email</span></b></td>
+	 <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+	  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Department</span></b></td>
+	</tr>
+	<tr style='mso-yfti-irow:1;mso-yfti-lastrow:yes;height:19pt'>
+	 <td valign=middle align="center" style='border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt; padding:0in 2pt 0in 2pt;height:19pt'>
+          <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+		<input type="text" name="req_name" id="req_name" size="20" value="<? echo $fullname; ?>">
+          </span>
+         </td>
+         <td valign=middle align="center" style='border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt; padding:0in 2pt 0in 2pt;height:19pt'>
+          <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+		<input type="text" name="phone" id="phone" size="12" value="<? echo $telephone; ?>">
+          </span>
+         </td>
+         <td valign=middle align="center" style='border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt; padding:0in 2pt 0in 2pt;height:19pt'>
+          <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+		<input type="text" name="email" id="email" size="24" value="<? echo $email; ?>">
+          </span>
+         </td>
+         <td valign=middle align="center" style='border:solid black 1.0pt;border-top:none;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt; padding:0in 2pt 0in 2pt;height:19pt'>
+          <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>
+		<input type="text" name="dept" id="dept" size="15">
+          </span>
+         </td>
+	</tr>
+  </table>
+  
+<br />
+The Georgetown University Information Security Office has begun a server registration program to identify and assess the risks associated with servers throughout the university. The primary goal of this program is to locate servers that are critical business systems, servers with Personally Identifiable Information (PII), and servers that require inbound Internet connectivity.
+<br />
+<br />
+
+<h2 align="center">Server Information:</h2>
+
+<table border=0 align="center" cellpadding=0 cellspacing=0 class=MsoNormalTable style='border-collapse:collapse;'>
+	<tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:15.5pt'>
+	 <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+	  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>FQDN/Name</span></b></td>
+	 <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;padding:0in 2pt 0in 2pt;height:15.5pt'>
+	  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'></span>
+		<input type="text" name="fqdn_name" id="fqdn_name" size="30">
+          </span>
+	 </td>
+	</tr>
+	<tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:15.5pt'>
+	 <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+	  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>IP Address</span></b></td>
+	 <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;padding:0in 2pt 0in 2pt;height:15.5pt'>
+	  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'><i>ex. 141.161.xxx.xxx</i></span></b><br />
+		<input type="text" name="ip_add" id="ip_add" size="30">
+          </span>
+         </td>
+	</tr>
+	<tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:15.5pt'>
+	 <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+	  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Operating System</span></b></td>
+	 <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;padding:0in 2pt 0in 2pt;height:15.5pt'>
+	  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'></span>
+		<select name="os_type" id="os_type"><br />
+		  <option></option>
+		  <option value="Microsoft Windows">Microsoft Windows</option>
+		  <option value="Linux">Linux</option>
+		  <option value="Machintosh">Macintosh</option>
+		  <option value="Solaris">Solaris</option>
+		  <option value="Other">Other</option>
+		</select>
+	  </span>
+	 </td>
+	 <tr>
+    <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:15.5pt'>
+	 <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+	  <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Physical Location</span></b></td>
+	 <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;padding:0in 2pt 0in 2pt;height:15.5pt'>
+	  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'></span>
+		<input type="text" name="serv_add" id="serv_add" size="30">
+          </span>
+	 </td>
+	</tr>
+	    <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:15.5pt'>
+	 <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 2pt 0in 2pt;height:15.5pt'>
+	  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'><b>Group E-mail</b><br />(Unit E-mail Address)</span></td>
+	 <td valign=top align="center" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;padding:0in 2pt 0in 2pt;height:15.5pt'>
+	  <span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'></span>
+		<input type="text" name="grp_email" id="grp_email" size="30">
+          </span>
+	 </td>
+	</tr>
+</table>
+
+<br />
+
+<h2 align="center">Additional Comments:</h2>
+
+<textarea name="comments" class='flext growme' cols="50" rows="1"></textarea>
+
+<br /><br />
+
+<input type="reset" name="clear" value="Reset">
+<input type="submit" name ="submit" value="Next">
+<input type="hidden" name="oncethrough" value="Yes">
+<input type="hidden" name="netID" value="<? echo $netid; ?>" />
+</form>
+<? } ?>
+</div>
+<div id="footer">
+	<div class="left"><a href="http://www.georgetown.edu/">Georgetown University</a> | <a href="http://uis.georgetown.edu/">University Information Services</a></div>
+	<div class="right"><a href="http://security.georgetown.edu/8933.html">Contact Us</a> | <a href="http://search.georgetown.edu/">Search</a> | <a href="http://explore.georgetown.edu/sites/">Site Index</a> | <a href="http://security.georgetown.edu/8934.html">About <abbr title="University Information Security Office">UISO</abbr></a></div>
+</div>
+</body>
+</html>

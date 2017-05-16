@@ -1,0 +1,195 @@
+<?php
+
+include_once("conf/fw_db.conf");
+include_once("sanitize.inc");
+
+function ldap_authenticate() {
+    
+    if ($_SERVER['PHP_AUTH_USER'] != "" && $_SERVER['PHP_AUTH_PW'] != "") {
+        $ds=ldap_connect("ldaps://directory.georgetown.edu");
+	ldap_set_option($ds, LDAP_OPT_PROTOCOL_VERSION, 3);
+	$netid=$_SERVER['PHP_AUTH_USER'];
+	$filter="(uid=$netid)";
+	$ldap_user = "uid=" . $netid . ",ou=people,dc=georgetown,dc=edu";
+        if (ldap_bind( $ds, $ldap_user, $_SERVER['PHP_AUTH_PW']) ) {
+        	$r = ldap_search( $ds, 'ou=people,dc=georgetown,dc=edu', $filter);
+        	if ($r) {
+            		$result = ldap_get_entries( $ds, $r);
+            		if ($result[0]) {
+                    	return $result[0];
+                }
+            }
+        }
+    }
+    header('WWW-Authenticate: Basic realm="NetID Password Authentication"');
+    header('HTTP/1.0 401 Unauthorized');
+	echo 'Your authentication has failed. Please try again.';
+    return NULL;
+}
+
+if (($result = ldap_authenticate()) == NULL) {
+    exit(0);
+}
+
+?>
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>IP Blacklist Form</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+
+		<link rel="stylesheet" type="text/css" href="css/mike_template.css" media="screen" />
+		<link rel="stylesheet" type="text/css" href="css/ajaxtabs.css" />
+		<script src='javascript/mootools-yui-compressed.js' type='text/javascript'></script> 
+		<script src='javascript/flext-uncompressed.js' type='text/javascript' ></script>
+		<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+		
+		
+		<!--Put the following in the <head>-->
+<script type="text/javascript">
+$("document").ready(function(){
+  $(".js-ajax-php-json").submit(function(){
+    var data = {
+      "action": "test"
+    };
+    data = $(this).serialize() + "&" + $.param(data);
+    $.ajax({
+      type: "POST",
+      dataType: "json",
+      url: "response.php", //Relative or absolute path to response.php file
+      data: data,
+      success: function(data) {
+        $(".the-return").html(
+          "Favorite beverage: " + data["favorite_beverage"] + "<br />Favorite restaurant: " + data["favorite_restaurant"] + "<br />Gender: " + data["gender"] + "<br />JSON: " + data["json"]
+        );
+
+        alert("Form submitted successfully.\nReturned json: " + data["json"]);
+      }
+    });
+    return false;
+  });
+});
+</script>
+ 
+		
+		
+		<script src='javascript/ajaxtabs.js' type='text/javascript'>
+		/***********************************************
+		* Ajax Tabs Content script v2.2- © Dynamic Drive DHTML code library (www.dynamicdrive.com)
+		* This notice MUST stay intact for legal use
+		* Visit Dynamic Drive at http://www.dynamicdrive.com/ for full source code
+		***********************************************/
+		</script>
+		<SCRIPT LANGUAGE="JavaScript">
+		function popUp(URL, w, h) {
+   			 day = new Date();
+   			 id = day.getTime();
+    		eval("page" + id + " = window.open(URL, '" + id + "', 'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=0,width=" + w + ",height=" + h + ",left = 290,top = 212');");
+		}
+		</script>
+	</head>
+		<body>
+
+		<div id="header">
+			<div class="left"><a href="http://www.georgetown.edu/">Georgetown University</a> | <a href="http://uis.georgetown.edu/">University Information Services</a></div>
+			<div class="right"><a href="http://security.georgetown.edu/8933.html">Contact Us</a> | <a href="http://search.georgetown.edu/">Search</a> | <a href="http://explore.georgetown.edu/sites/">Site Index</a> | <a href="http://security.georgetown.edu/8934.html">About <abbr title="University Information Security Office">UISO</abbr></a></div>
+		</div>
+		<div id="title">
+			<h1><a href="http://security.georgetown.edu/">University Information Security Office</a></h1>
+		</div>
+<hr />
+<br />  
+
+
+
+<div id="countrydivcontainer" style="border:1px solid gray; width:94%; margin-bottom: 1em; margin-left: 1em; padding: 10px">
+
+
+
+ <! TRYING TO PUT IN THE REVERSE NS LOOKUP SCRIPT !-->
+
+<script>
+        function PostData() {
+            var xhr;
+            if (window.XMLHttpRequest) {
+                xhr = new XMLHttpRequest();
+            }
+            else if (window.ActiveXObject) {
+                xhr = new ActiveXObject("Msxml2.XMLHTTP");
+            }
+            else {
+                throw new Error("Ajax is not supported by this browser");
+            }
+            
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status == 200 && xhr.status < 300) {
+                        // www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10 
+                        document.getElementById('myDiv').innerHTML = xhr.responseText;
+                    }
+                }
+            }
+            
+            var ipToBlock = document.getElementById("ipToBlock").value;
+			var description = document.getElementById("description").value;
+
+            xhr.open('POST', 'ip_block.php', true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.send("ip_to_block=" + ip_to_block);
+			xhr.send("description=" + description);
+        }
+
+    </script>
+
+
+
+	<h1>Blacklist IP Form</h1>
+	
+	<h5>
+		<p>You may enter:
+		<ol>
+			<li <p>IP Address (e.g. 10.0.0. /32)</p></li>
+			<li <p>IP Subnet (e.g. 10.0.0.0/24)</p></li>
+			<li <p>IP Range (e.g. 10.0.0.1-10.0.0.25). Do not put spaces in between the hyphen and the IP addresses.</p></li>
+		</ol>
+			
+			
+			
+		</p>
+	</h5>
+	
+	
+	<form action="ip_block.php" method="post">
+		
+	<p>Add to Blacklist<input type="checkbox" value ="Add" name="Add"</p>
+ <p>Remove From Blacklist<input type="checkbox" value ="Remove" name="Remove"</p>	
+		
+ <p>IP Address: <textarea class='flext growme' name="ip_to_block" cols="18" rows="1"required></textarea>
+ <? echo sanitize($_POST['ip_to_block'], SQL); ?>
+      <input type="hidden" name="sanIp" value="<? echo sanitize($_POST['ip_to_block'], SQL); ?>">
+ 
+ </p>
+ <p>Description: <textarea class='flext growme' name="description" cols="18" rows="1"required></textarea>
+ <? echo sanitize($_POST['description'], SQL); ?>
+      <input type="hidden" name="sanDes" value="<? echo sanitize($_POST['description'], SQL); ?>">
+ </p>
+ 
+ 
+ <p><input type="submit"/></p>
+ 
+</form>
+	<form action="show_list.php" method="post">
+	<p><input type="submit" value="View IP Blacklist"</p>
+	</form>
+	
+
+	</div>
+
+	<div id="footer">
+		<div class="left"><a href="http://www.georgetown.edu/">Georgetown University</a> | <a href="http://uis.georgetown.edu/">University Information Services</a></div>
+		<div class="right"><a href="http://security.georgetown.edu/8933.html">Contact Us</a> | <a href="http://search.georgetown.edu/">Search</a> | <a href="http://explore.georgetown.edu/sites/">Site Index</a> | <a href="http://security.georgetown.edu/8934.html">About <abbr title="University Information Security Office">UISO</abbr></a></div>
+		</div>
+	</body>
+</html> 

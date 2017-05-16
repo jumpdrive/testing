@@ -1,0 +1,1760 @@
+<?php
+
+function ldap_authenticate() {
+    
+    if ($_SERVER['PHP_AUTH_USER'] != "" && $_SERVER['PHP_AUTH_PW'] != "") {
+        $ds=ldap_connect("ldaps://directory.georgetown.edu");
+	ldap_set_option($ds, LDAP_OPT_PROTOCOL_VERSION, 3);
+	$netid=$_SERVER['PHP_AUTH_USER'];
+	$filter="(uid=$netid)";
+	$ldap_user = "uid=" . $netid . ",ou=people,dc=georgetown,dc=edu";
+        if (ldap_bind( $ds, $ldap_user, $_SERVER['PHP_AUTH_PW']) ) {
+        	$r = ldap_search( $ds, 'ou=people,dc=georgetown,dc=edu', $filter);
+        	if ($r) {
+            		$result = ldap_get_entries( $ds, $r);
+            		if ($result[0]) {
+                    		return $result[0];
+                }
+            }
+        }
+    }
+    header('WWW-Authenticate: Basic realm="NetID Password Authentication"');
+    header('HTTP/1.0 401 Unauthorized');
+	echo 'Your authentication has failed. Please try again.';
+    return NULL;
+}
+
+if (($result = ldap_authenticate()) == NULL) {
+    exit(0);
+}
+
+#Includes:
+include_once("sanitize.inc");
+include_once("conf/fw_db.conf");
+
+
+
+#Cleaned post vars:
+$req_name = sanitize($_POST['req_name'], SQL);
+$email = sanitize($_POST['email'], SQL);
+$phone = sanitize($_POST['phone'], SQL);
+$dept = sanitize($_POST['dept'], SQL);
+
+$XField94533_A = sanitize($_POST['Field94533_A'], SQL);
+$XField94533_B = sanitize($_POST['Field94533_B'], SQL);
+$XField94533_C = sanitize($_POST['Field94533_C'], SQL);
+
+
+$XField94644_A = sanitize($_POST['Field94644_A'], SQL);
+$XField94644_B = sanitize($_POST['Field94644_B'], SQL);
+$XField94644_C = sanitize($_POST['Field94644_C'], SQL);
+
+$XField94552 = sanitize($_POST['Field94552'], SQL);
+$XField94553 = sanitize($_POST['Field94553'], SQL);
+$XField94554 = sanitize($_POST['Field94554'], SQL);
+$XField94555 = sanitize($_POST['Field94555'], SQL);
+
+$XField94556_A = sanitize($_POST['Field94556_A'], SQL);
+$XField94556_B = sanitize($_POST['Field94556_B'], SQL);
+$XField94556_C = sanitize($_POST['Field94556_C'], SQL);
+
+$XField94558 = sanitize($_POST['Field94558'], SQL);
+
+
+$XField94562_A = sanitize($_POST['Field94562_A'], SQL);
+$XField94562_B = sanitize($_POST['Field94562_B'], SQL);
+$XField94562_C = sanitize($_POST['Field94562_C'], SQL);
+
+$XField94565_A = sanitize($_POST['Field94565_A'], SQL);
+$XField94565_B = sanitize($_POST['Field94565_B'], SQL);
+$XField94565_C = sanitize($_POST['Field94565_C'], SQL);
+
+$XField94567_A = sanitize($_POST['Field94567_A'], SQL);
+$XField94567_B = sanitize($_POST['Field94567_B'], SQL);
+$XField94567_C = sanitize($_POST['Field94567_C'], SQL);
+
+$XField94569 = sanitize($_POST['Field94569'], SQL);
+
+$XField94572 = sanitize($_POST['Field94572'], SQL);
+$XField94573 = sanitize($_POST['Field94573'], SQL);
+$XField94575 = sanitize($_POST['Field94575'], SQL);
+$XField94576 = sanitize($_POST['Field94576'], SQL);
+$XField94640 = sanitize($_POST['Field94640'], SQL);
+
+$XField94577_A = sanitize($_POST['Field94577_A'], SQL);
+$XField94577_B = sanitize($_POST['Field94577_B'], SQL);
+$XField94577_C = sanitize($_POST['Field94577_C'], SQL);
+
+
+$XField94581 = sanitize($_POST['Field94581'], SQL);
+$XField94582 = sanitize($_POST['Field94582'], SQL);
+$XField94583 = sanitize($_POST['Field94583'], SQL);
+$XField94584 = sanitize($_POST['Field94584'], SQL);
+$XField94585 = sanitize($_POST['Field94585'], SQL);
+$XField94586 = sanitize($_POST['Field94586'], SQL);
+$XField94587 = sanitize($_POST['Field94587'], SQL);
+
+$XField94588_A = sanitize($_POST['Field94588_A'], SQL);
+$XField94588_B = sanitize($_POST['Field94588_B'], SQL);
+$XField94588_C = sanitize($_POST['Field94588_C'], SQL);
+
+$XField94592 = sanitize($_POST['Field94592'], SQL);
+$XField94593 = sanitize($_POST['Field94593'], SQL);
+$XField94594 = sanitize($_POST['Field94594'], SQL);
+
+$XField94612 = sanitize($_POST['Field94612'], SQL);
+
+$XField94596 = sanitize($_POST['Field94596'], SQL);
+
+$XField94597_A = sanitize($_POST['Field94597_A'], SQL);
+$XField94597_B = sanitize($_POST['Field94597_B'], SQL);
+$XField94597_C = sanitize($_POST['Field94597_C'], SQL);
+
+$XField94601 = sanitize($_POST['Field94601'], SQL);
+$XField94602 = sanitize($_POST['Field94602'], SQL);
+$XField94603 = sanitize($_POST['Field94603'], SQL);
+$XField94604 = sanitize($_POST['Field94604'], SQL);
+
+$XField94608 = sanitize($_POST['Field94608'], SQL);
+                                  
+$XField94609_A = sanitize($_POST['Field94609_A'], SQL);
+$XField94609_B = sanitize($_POST['Field94609_B'], SQL);
+$XField94609_C = sanitize($_POST['Field94609_C'], SQL);
+$XField94610 = sanitize($_POST['Field94610'], SQL);
+$XField94611 = sanitize($_POST['Field94611'], SQL);
+
+$XField94639 = sanitize($_POST['Field94639'], SQL);
+
+
+
+
+$LDAP_Group = sanitize($_POST['LDAP_Group'], SQL);
+$action1 = sanitize($_POST['action1'], SQL);
+$netid1 = sanitize($_POST['NetID1'], SQL);
+
+?>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>SUA Request Form</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+
+		<link rel="stylesheet" type="text/css" href="css/template.css" media="screen" />
+		<link rel="stylesheet" type="text/css" href="css/ajaxtabs.css" />
+
+<script type="text/javascript">
+var dtCh= "/";
+var minYear=1900;
+var maxYear=2100;
+
+function validate_required(field,alerttxt){
+        with (field){
+         if (value==null||value==""||value==0) {
+            alert(alerttxt);
+            return false;
+            }
+         else {
+            return true;
+            }
+        }
+    }
+function validate_email(field,alerttxt) {
+	with (field) {
+		apos=value.indexOf("@")
+		dotpos=value.lastIndexOf(".")
+		if (apos<1||dotpos-apos<2) {
+			alert(alerttxt);
+			return false;
+		} else {
+			return true;
+		}
+	}
+}
+function daysInFebruary (year){
+	// February has 29 days in any year evenly divisible by four,
+    // EXCEPT for centurial years which are not also divisible by 400.
+    return (((year % 4 == 0) && ( (!(year % 100 == 0)) || (year % 400 == 0))) ? 29 : 28 );
+}
+function isInteger(s){
+	var i;
+    for (i = 0; i < s.length; i++){   
+        // Check that current character is number.
+        var c = s.charAt(i);
+        if (((c < "0") || (c > "9"))) return false;
+    }
+    // All characters are numbers.
+    return true;
+}
+function daysInFebruary (year){
+	// February has 29 days in any year evenly divisible by four,
+    // EXCEPT for centurial years which are not also divisible by 400.
+    return (((year % 4 == 0) && ( (!(year % 100 == 0)) || (year % 400 == 0))) ? 29 : 28 );
+}
+function DaysArray(n) {
+	for (var i = 1; i <= n; i++) {
+		this[i] = 31
+		if (i==4 || i==6 || i==9 || i==11) {this[i] = 30}
+		if (i==2) {this[i] = 29}
+   } 
+   return this
+}
+function checkDate(sMonth, sDay, sYear){
+	var daysInMonth = DaysArray(12)
+	month=parseInt(sMonth.value)
+	day=parseInt(sDay.value)
+	year=parseInt(sYear.value)
+
+	//alert("m/d/y " + month + "/" + day + "/" + year)
+
+	if (sMonth.length<1 || month<1 || month>12){
+		alert("Please enter a valid month")
+		return false
+	}
+
+	if (sDay.length<1 || day<1 || day>31 || (month==2 && day>daysInFebruary(year)) || day > daysInMonth[month]){
+		alert("Please enter a valid day of the month")
+		return false
+	}
+
+	if (year<minYear || year>maxYear){
+		alert("Please enter a valid 4 digit year between "+minYear+" and "+maxYear)
+
+		return false
+	}
+
+
+
+	return true;
+	
+}
+
+
+
+
+function verify_submit(thisform) {
+    with (thisform) {
+	
+	if (checkDate(Field94533_A,Field94533_B,Field94533_C)==false) {
+            Field94533_B.focus();
+            return false;		
+	}
+
+	if (checkDate(Field94644_A,Field94644_B,Field94644_C)==false) {
+            Field94644_B.focus();
+            return false;		
+	}
+
+
+        if (validate_required(Field94552,"Please enter the Associate's first name.")==false) {
+            Field94552.focus();
+            return false;
+            }
+        if (validate_required(Field94554,"Please enter the Associate's last name.")==false) {
+            Field94554.focus();
+            return false;
+            }
+        if (validate_required(Field94555,"Please enter a preferred e-mail address.")==false) {
+            Field94555.focus();
+            return false;
+            }
+	if (validate_email(Field94555,"Not a valid e-mail address!")==false) {
+            Field94555.focus();
+  	    return false;
+	    }	    
+        if (validate_required(Field94556_A,"Please enter the Associate's date of birth.")==false) {
+            Field94556_A.focus();
+            return false;
+            }
+        if (validate_required(Field94556_B,"Please enter the Associate's date of birth.")==false) {
+            Field94556_B.focus();
+            return false;
+            }
+        if (validate_required(Field94556_C,"Please enter the Associate's date of birth.")==false) {
+            Field94556_C.focus();
+            return false;
+            }
+
+	if (checkDate(Field94556_A,Field94556_B,Field94556_C)==false) {
+            Field94556_B.focus();
+            return false;		
+	}
+	
+        if (validate_required(Field94558,"Please enter a gender.")==false) {
+            Field94558.focus();
+            return false;
+            }
+        if (validate_required(Field94581,"Please enter the GU building in which the Associate will be working. ")==false) {
+            Field94581.focus();
+            return false;
+            }
+        if (validate_required(Field94582,"Please enter the GU building room number in which the Associate will be working.")==false) {
+            Field94582.focus();
+            return false;
+            }
+        if (validate_required(Field94592,"Please enter the sponsor's name.")==false) {
+            Field94592.focus();
+            return false;
+            }
+        if (validate_required(Field94593,"Please enter the sponsor's title.")==false) {
+            Field94593.focus();
+            return false;
+            }
+        if (validate_required(Field94593,"Please enter the sponsor's title.")==false) {
+            Field94593.focus();
+            return false;
+            }
+        if (validate_required(Field94594,"Please enter the sponsor's e-mail address.")==false) {
+            Field94594.focus();
+            return false;
+            }
+        if (validate_required(Field94612,"Please select a department for the sponsor.")==false) {
+            Field94612.focus();
+            return false;
+            } 
+        if (validate_required(Field94596,"Please enter the sponsor's cost center.")==false) {
+            Field94596.focus();
+            return false;
+            }
+        if (validate_required(Field94597_A,"Please enter the sponsor's phone number.")==false) {
+            Field94597_A.focus();
+            return false;
+            }	    
+        if (validate_required(Field94597_B,"Please enter the sponsor's phone number.")==false) {
+            Field94597_B.focus();
+            return false;
+            }	    
+        if (validate_required(Field94597_C,"Please enter the sponsor's phone number.")==false) {
+            Field94597_C.focus();
+            return false;
+            }	    
+
+
+	}
+}
+</script>
+
+		<script src='javascript/mootools-yui-compressed.js' type='text/javascript'></script> 
+		<script src='javascript/flext-uncompressed.js' type='text/javascript' ></script>
+		<script src='javascript/ajaxtabs.js' type='text/javascript'>
+		/***********************************************
+		* Ajax Tabs Content script v2.2- © Dynamic Drive DHTML code library (www.dynamicdrive.com)
+		* This notice MUST stay intact for legal use
+		* Visit Dynamic Drive at http://www.dynamicdrive.com/ for full source code
+		***********************************************/
+		</script>
+		<SCRIPT LANGUAGE="JavaScript">
+		function popUp(URL, w, h) {
+   			 day = new Date();
+   			 id = day.getTime();
+    		eval("page" + id + " = window.open(URL, '" + id + "', 'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=0,width=" + w + ",height=" + h + ",left = 290,top = 212');");
+		}
+		</script>
+	</head>
+		<body onLoad="initdt(document.form1)">
+
+		<div id="header">
+			<div class="left"><a href="http://www.georgetown.edu/">Georgetown University</a> | <a href="http://uis.georgetown.edu/">University Information Services</a></div>
+			<div class="right"><a href="http://security.georgetown.edu/8933.html">Contact Us</a> | <a href="http://search.georgetown.edu/">Search</a> | <a href="http://explore.georgetown.edu/sites/">Site Index</a> | <a href="http://security.georgetown.edu/8934.html">About <abbr title="University Information Security Office">UISO</abbr></a></div>
+		</div>
+		<div id="title">
+			<h1><a href="http://security.georgetown.edu/">University Information Security Office</a></h1>
+		</div>
+<hr />
+<br />  
+
+
+<? if (strlen($_POST['oncethrough']) != 0){ 
+
+#HTML for verification of data that was just entered
+?>
+
+<form name="form2" method="post" action="sua_request.html">
+	
+    <p class=Default><b>Please review the request for correctness:</b></p>
+	
+    <table border=0 align="center" cellpadding=0 cellspacing=0 class=MsoNormalTable style='border-collapse:collapse;'>
+		
+ <tr>
+  <td class="UTH"><b>Requester</b></td>
+  <td class="UTH"><b>Requester's Phone#</b></td>
+  <td class="UTH"><b>Requester's Email</b></td>
+  <td class="UTH"><b>Department</b></td>
+  
+ </tr>
+ <tr>
+      <td class="UTD"><?=$req_name?><input type="hidden" name="req_name" value="<?=$req_name?>">  </td>
+      <td class="UTD"><?=$phone?><input type="hidden" name="req_name" value="<?=$phone?>">  </td>
+      <td class="UTD"><?=$email?><input type="hidden" name="req_name" value="<?=$email?>">  </td>     
+      <td class="UTD"><?=$dept?><input type="hidden" name="req_name" value="<?=$dept?>">  </td>    
+ </tr>
+</table>
+
+<p class=Default align="center"><b>Sponsored University Associate</b></p>
+
+<table align="center" class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="53%" style='width:53%;border-collapse:collapse;mso-padding-alt:0in 1.0pt 0in 1.0pt'>
+ <tr>
+  <td width="40%" class="UTH" align=center><b>Field Name:</B></td>
+  <td width="60%" class="UTH" align=center><b>Field Value:</B></td>    
+</tr>
+ 
+ <tr><td width="40%" class="UTD" align=center>Effective Start Date</td>
+  <td width="60%" class="UTD" align=center><?=$XField94533_A?>/<?=$XField94533_B?>/<?=$XField94533_C?></td></tr>
+ 
+ <tr><td width="40%" class="UTD" align=center>End Date</td>
+   <td width="60%" class="UTD" align=center><?=$XField94644_A?>/<?=$XField94644_B?>/<?=$XField94644_C?></td></tr>
+
+ <tr><td width="40%" class="UTD" align=center>Associate Name</td>
+   <td width="60%" class="UTD" align=center><?=$XField94552?> <?=$XField94553?> <?=$XField94554?></td></tr>
+
+ <tr><td width="40%" class="UTD" align=center>Preferred E-Email</td>
+   <td width="60%" class="UTD" align=center><?=$XField94555?></td></tr>
+
+<tr><td width="40%" class="UTD" align=center>Date of Birth</td>
+   <td width="60%" class="UTD" align=center>
+<?
+	if ($XField94556_A) {print "$XField94556_A/$XField94556_B/$XField94556_C<br>"; }
+?>
+</td></tr>
+
+ <tr><td width="40%" class="UTD" align=center>Gender</td>
+   <td width="60%" class="UTD" align=center><?=$XField94558?></td></tr>
+
+ <tr><td width="40%" class="UTD" align=center>Associations</td>
+   <td width="60%" class="UTD" align=center>
+	<?
+	if ($XField94562_A) {print "$XField94562_A<br>"; }
+	if ($XField94562_B) {print "$XField94562_B<br>"; }
+	if ($XField94562_C) {print "$XField94562_C<br>"; }
+	?>
+</td></tr>
+
+ <tr><td width="40%" class="UTD" align=center>Former Employee Dates</td>
+   <td width="60%" class="UTD" align=center>
+	<?
+	if ($XField94565_A) {print "From: $XField94565_A/$XField94565_B/$XField94565_C<br>To: $XField94567_A/$XField94567_B/$XField94567_C"; }
+
+	?>
+   </td></tr>
+   
+ <tr><td width="40%" class="UTD" align=center>Previous NetID</td>
+   <td width="60%" class="UTD" align=center><?=$XField94569?></td></tr>   
+
+ <tr><td width="40%" class="UTD" align=center>Home Address</td>
+   <td width="60%" class="UTD" align=center>
+	<?
+	if ($XField94572) {print "$XField94572<br>"; }
+	if ($XField94573) {print "$XField94573<br>"; }
+	if ($XField94575) {print "$XField94575<br>"; }
+	if ($XField94576) {print "$XField94576<br>"; }
+	if ($XField94640) {print "$XField94640<br>"; }
+	?>	
+	</td></tr>   
+ <tr><td width="40%" class="UTD" align=center>Home Phone</td>
+   <td width="60%" class="UTD" align=center>
+
+	<?
+	if ($XField94577_A) {print "($XField94577_A) "; }
+	if ($XField94577_B) {print "$XField94577_B-"; }
+	if ($XField94577_C) {print "$XField94577_C"; }
+	?>	
+   </td></tr>   
+
+<tr><td width="40%" class="UTD" align=center>Work Location</td>
+   <td width="60%" class="UTD" align=center>
+	<?
+	if ($XField94581) {print "GU Building: $XField94581<br>"; }
+	if ($XField94582) {print "Room: $XField94582<br>"; }
+	if ($XField94583) {print "Street:  $XField94583<br>"; }
+	if ($XField94584) {print "City: $XField94584<br>"; }
+	if ($XField94585) {print "State: $XField94585<br>"; }
+	if ($XField94587) {print "Zip: $XField94587<br>"; }	
+	if ($XField94586) {print "Country: $XField94586<br>"; }
+	?>	
+	</td></tr>   
+
+ <tr><td width="40%" class="UTD" align=center>GU Phone</td>
+   <td width="60%" class="UTD" align=center>
+
+	<?
+	if ($XField94588_A) {print "($XField94588_A) "; }
+	if ($XField94588_B) {print "$XField94588_B-"; }
+	if ($XField94588_C) {print "$XField94588_C"; }
+	?>	
+   </td></tr>   
+
+
+<tr><td width="40%" class="UTD" align=center>Sponsor Information</td>
+   <td width="60%" class="UTD" align=center>
+	<?
+	if ($XField94572) {print "Name: $XField94592<br>"; }
+	if ($XField94573) {print "Title: $XField94593<br>"; }
+	if ($XField94575) {print "Email: $XField94594<br>"; }
+	if ($XField94612) {print "Department: $XField94612<br>"; }
+	if ($XField94596) {print "Cost Center: $XField94596<br>"; }
+	if ($XField94597_A) {print "Phone: ($XField94597_A) "; }
+	if ($XField94597_B) {print "$XField94597_B-"; }
+	if ($XField94597_C) {print "$XField94597_C"; }
+
+	?>	
+   </td></tr>   
+<tr><td width="40%" class="UTD" align=center>Association with GU</td>
+   <td width="60%" class="UTD" align=center>
+	<?
+	if ($XField94601) {print "Campus: $XField94601<br>"; }
+	if ($XField94602) {print "Role: $XField94602<br>"; }
+	if ($XField94603) {print "Associate's Title: $XField94603<br>"; }
+	if ($XField94604) {print "Associate's Duties: $XField94604<br>"; }
+	?>	
+   </td></tr>   
+
+<tr><td width="40%" class="UTD" align=center>Identity Verification</td>
+   <td width="60%" class="UTD" align=center>
+	<?
+	if ($XField94608) {print "Document Type: $XField94608<br>"; }
+	if ($XField94609_A) {print "Verification Date: $XField94609_A/$XField94609_B/$XField94609_C<br>"; }
+	if ($XField94610) {print "Name of Person Verifying: $XField94610<br>"; }
+	if ($XField94611) {print "NetID of Person Verifying: $XField94611<br>"; }
+	?>	
+   </td></tr>   
+
+<tr><td width="40%" class="UTD" align=center>Comments</td>
+   <td width="60%" class="UTD" align=center>
+	<?
+	if ($XField94639) {print "$XField94639"; }
+	?>	
+   </td></tr>   
+
+
+
+
+</table>
+<input name="action1" type="hidden" value="<? echo sanitize($_POST['action1'], SQL); ?>">
+<input name="action2" type="hidden" value="<? echo sanitize($_POST['action2'], SQL); ?>">
+<input name="action3" type="hidden" value="<? echo sanitize($_POST['action3'], SQL); ?>">
+<input name="action4" type="hidden" value="<? echo sanitize($_POST['action4'], SQL); ?>">
+<input name="action5" type="hidden" value="<? echo sanitize($_POST['action5'], SQL); ?>">
+<input name="action6" type="hidden" value="<? echo sanitize($_POST['action6'], SQL); ?>">
+<input name="NetID1" type="hidden" value="<? echo sanitize($_POST['NetID1'], SQL); ?>">
+<input name="NetID2" type="hidden" value="<? echo sanitize($_POST['NetID2'], SQL); ?>">
+<input name="NetID3" type="hidden" value="<? echo sanitize($_POST['NetID3'], SQL); ?>">
+<input name="NetID4" type="hidden" value="<? echo sanitize($_POST['NetID4'], SQL); ?>">
+<input name="NetID5" type="hidden" value="<? echo sanitize($_POST['NetID5'], SQL); ?>">
+<input name="NetID6" type="hidden" value="<? echo sanitize($_POST['NetID6'], SQL); ?>">
+
+
+
+<br />
+Additional comments: <b>
+  <? echo sanitize($_POST['comment_other'], SQL); ?><input type="hidden" name="comment_other" value="<? echo sanitize($_POST['comment_other'], SQL); ?>"></b>
+	
+	<p class=Default align=center><b>
+	<input type="submit" name ="submit" value ="Submit"> &nbsp; <input type="button" value ="Back" onClick="history.go(-1)">
+	<input type="hidden" name="twicethrough" value="Yes">
+	<input name="netID" value="<? echo sanitize($_POST['netID'], SQL); ?>" type=hidden>
+	</b></p>
+    </form>
+
+<? }
+
+	#Twice Thru means input data has been approved and we just need to process.
+	#below is exampls of sending html email, text email, and inserting a record.
+elseif (strlen($_POST['twicethrough']) != 0) {
+
+	include_once("sanitize.inc");
+	
+function send_email($from, $reply, $to, $subject, $message){
+        $headers = 'From: ' . $from . "\n";
+        $headers .= 'Reply-To: ' . $reply . "\n";
+        $headers .= 'Return-Path: ' . $reply . "\n";
+		$headers .= 'X-Mailer: PHP/' . phpversion() . "\n";
+        mail($to,$subject,$message,$headers);
+}
+
+function send_email_html($from, $reply, $to, $cc, $subject, $message){
+        $headers = 'From: ' . $from . "\n";
+        $headers .= 'Reply-To: ' . $reply . "\n";
+		$headers .= 'CC: ' . $cc . "\n";
+        $headers .= 'Return-Path: ' . $reply . "\n";
+		$headers .= 'X-Mailer: PHP/' . phpversion() . "\n";
+		$headers  .= 'MIME-Version: 1.0' . "\n";
+		$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\n";
+        mail($to,$subject,$message,$headers);
+}
+
+
+
+# insert rules in db
+mysql_connect($db_host,$user,$password);
+@mysql_select_db($database) or die( "Unable to select database");
+
+$LDAP_Group=sanitize($_POST['LDAP_Group'], SQL);
+$netID=sanitize($_POST['netID'], SQL);
+$action1=sanitize($_POST['action1'], SQL);
+$action2=sanitize($_POST['action2'], SQL);
+$action3=sanitize($_POST['action3'], SQL);
+$action4=sanitize($_POST['action4'], SQL);
+$action5=sanitize($_POST['action5'], SQL);
+$action6=sanitize($_POST['action6'], SQL);
+$netid1=sanitize($_POST['NetID1'], SQL);
+$netid2=sanitize($_POST['NetID2'], SQL);
+$netid3=sanitize($_POST['NetID3'], SQL);
+$netid4=sanitize($_POST['NetID4'], SQL);
+$netid5=sanitize($_POST['NetID5'], SQL);
+$netid6=sanitize($_POST['NetID6'], SQL);
+$comment=sanitize($_POST['comment_other'], SQL);
+
+	if(strlen($LDAP_Group) != 0){
+
+		$insert1 = "INSERT INTO ldap_group_request (requester, ldap_group, action1, netid1, action2, netid2, action3, netid3, action4, netid4, action5, netid5, action6, netid6, comment )
+                    VALUES('$netID', '$LDAP_Group', '$action1', '$netid1', '$action2', '$netid2', '$action3', '$netid3', '$action4', '$netid4', '$action5', '$netid5', '$action6', '$netid6', '$comment' )";
+		#mysql_query($insert1) or die(mysql_error());
+
+		}
+
+mysql_close();
+
+$hd_to = "dcs44@georgetown.edu, housej@georgetown.edu";
+$hd_from = "LDAP Group Request <NetID@georgetown.edu>";
+$hd_replyto = $_POST['email'];
+$hd_subject = "LDAP Group Reqest - " . $_POST['netID'];
+		
+$hd_msg = "Helpdesk,\n\n";
+$hd_msg .= "Please open a ticket for assignment to the NetID Office for changing the membership for LDAP Group '$LDAP_Group'.\n\n";
+
+#$hd_msg .= "Requester: " . $_POST['req_name'] . "\n";
+#$hd_msg .= "Phone: " . $_POST['phone'] . "\n";
+#$hd_msg .= "E-mail: " . $_POST['email'] . "\n";
+#$hd_msg .= "Department: " . $_POST['dept'] . "\n";
+#$hd_msg .= "Category: " . $_POST['category'] . "\n\n";
+       
+#$hd_msg .= "VPN Role Requested:\n\n";
+
+#$hd_msg .= "Proposed VPN Role Name: " . $_POST['vpn_role_name'] . "\n";
+#$hd_msg .= "Add/Remove: " . $_POST['action'] . "\n";
+#$hd_msg .= "Purpose for VPN Role: " . $_POST['role_purpose'] . "\n";
+#$hd_msg .= "Contact person for VPN Role: " . $_POST['role_contact'] . "\n\n";
+
+#$hd_msg .= "Requester: " . $_POST['req_name'] . "\n";
+#$hd_msg .= "Phone: " . $_POST['phone'] . "\n";
+#$hd_msg .= "E-mail: " . $_POST['email'] . "\n";
+#$hd_msg .= "Department: " . $_POST['dept'] . "\n\n";
+
+$hd_msg .= "LDAP Group Membership Change Requested:  $LDAP_Group\n";
+$hd_msg .= "Change 1 - Action: $action1  NetID: $netid1\n";
+$hd_msg .= "Change 2 - Action: $action1  NetID: $netid2\n";
+$hd_msg .= "Change 3 - Action: $action1  NetID: $netid3\n";
+$hd_msg .= "Change 4 - Action: $action1  NetID: $netid4\n";
+$hd_msg .= "Change 5 - Action: $action1  NetID: $netid5\n";
+$hd_msg .= "Change 6 - Action: $action1  NetID: $netid6\n\n";
+
+$NetID = $_POST['netID'];
+if ((strlen($_POST['comment_other']) != 0)) {
+	$hd_msg .= "Additional Comments: " . $_POST['comment_other'] . "\n";
+}
+$hd_msg .= "Submitted by $NetID\n";
+$hd_msg .= "Request Received From: " . $_SERVER['REMOTE_ADDR'] . "\n";
+
+
+$sec_to = "dcs44@georgetown.edu";
+$sec_cc = $_POST['email'];
+$sec_from = "VPN Role Request <security@georgetown.edu>";
+$sec_replyto = $_POST['email'];
+$sec_subject = "VPN Role Request - " . $_POST['netID'];
+
+$sec_msg = "<html><body>
+	<p align=center><b><span style='font-size:10.0pt;color:windowtext'>VPN Role Request Submitted</span></b><span style='font-size:10.0pt;color:windowtext'></span></p>
+	<table class=MsoNormalTable border=1 cellspacing=0 cellpadding=0 style='border-collapse:collapse;mso-padding-alt:0in 5.4pt 0in 5.4pt' align='center'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:19.5pt'>
+  <td valign=top>
+  <p class=Default align=center style='text-align:center'><b><span style='font-size:8.0pt'></span></b>
+  <b><span style='font-size:8.0pt'>Requester's Name</span></b><span style='font-size:8.0pt'></span></p></td>
+  <td valign=top>
+  <p class=Default align=center style='text-align:center'><b><span style='font-size:8.0pt'>Requester's Phone</span></b>
+  <span style='font-size:8.0pt'></span></p></td>
+  <td valign=top>
+  <p class=Default align=center style='text-align:center'><b><span
+  style='font-size:8.0pt'></span></b><b><span
+  style='font-size:8.0pt'>Requester's Email</span></b><span style='font-size:
+  8.0pt'>
+    
+  </span></p></td>
+  <td valign=top>
+    <p class=Default align=center style='text-align:center'><b><span
+  style='font-size:8.0pt'>&nbsp;</span></b><b><span
+  style='font-size:8.0pt'>Department</span></b><span style='font-size:8.0pt'>
+      
+    </span></p></td>
+  <td valign=top>
+    <p class=Default align=center style='text-align:center'><b><span
+  style='font-size:8.0pt'>Change Category:<br>Normal/Urgent/Emergency</span></b><span style='font-size:8.0pt'>
+      </span></p></td>
+ </tr>
+ <tr style='mso-yfti-irow:1;mso-yfti-lastrow:yes;height:28.4pt'>
+  <td valign=middle>
+  <p class=Default align=center style='text-align:center'><span style='font-size:10.0pt;color:windowtext'>&nbsp;</span>
+    <label>
+      " . $_POST['req_name'] . "
+    </label>
+  </td>
+  <td valign=middle>
+  <p class=Default align=center style='text-align:center'><span style='font-size:10.0pt;color:windowtext'>&nbsp;</span>
+    <label>
+      " . $_POST['phone'] . "
+    </label>
+  </td>
+  <td valign=middle>
+  <p class=Default align=center style='text-align:center'><span style='font-size:10.0pt;color:windowtext'>&nbsp;</span>
+    <label>
+      " . $_POST['email'] . "
+    </label>
+  </td>
+  <td valign=middle>
+  <p class=Default align=center style='text-align:center'><span style='font-size:10.0pt;color:windowtext'>&nbsp;</span>
+      <label>
+        " . $_POST['dept'] . "
+        </label>
+    </td>
+  <td valign=middle>
+  <p class=Default align=center style='text-align:center'><span style='font-size:10.0pt;color:windowtext'>&nbsp;</span>
+      " . $_POST['category'] . "
+    </td>
+ </tr>
+</table>
+
+<p align=center><b><span style='font-size:10.0pt;color:windowtext'>VPN Role Requested:</span></b><span style='font-size:10.0pt;color:windowtext'></span></p>
+
+<table align='center' class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width='53%' style='width:53%;border-collapse:collapse;mso-padding-alt:0in 1.0pt 0in 1.0pt'>
+ <tr>
+  <td width='40%' align='left' valign=top style='border:solid black 1.0pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 1pt 0in 1pt;'>
+    <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Proposed VPN Role Name:</span></b></td>
+  <td width='60%' align='left' style='border:solid black 1.0pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt'>
+    <span style='text-align:center;font-size:8.0pt;color:windowtext;font-family:Arial,Helvetica,sans-serif;'>" .
+      sanitize($_POST['vpn_role_name'], SQL) . "</span>  </td>
+</tr>
+ <tr>
+  <td width='40%' align='left' valign=top style='border:solid black 1.0pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 1pt 0in 1pt;'>
+    <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Add/Remove:</span></b></td>
+  <td width='60%' align='left' style='border:solid black 1.0pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt'>
+    <span style='text-align:center;font-size:8.0pt;color:windowtext;font-family:Arial,Helvetica,sans-serif;'>" .
+      sanitize($_POST['action'], SQL) . "</span>  </td>
+</tr>
+ <tr>
+  <td width='40%' align='left' valign=top style='border:solid black 1.0pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 1pt 0in 1pt;'>
+    <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Purpose for VPN Role:</span></b></td>
+  <td width='60%' align='left' style='border:solid black 1.0pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt'>
+    <span style='text-align:center;font-size:8.0pt;color:windowtext;font-family:Arial,Helvetica,sans-serif;'>" .
+      sanitize($_POST['role_purpose'], SQL) . "</span>  </td>
+</tr>
+ <tr>
+  <td width='40%' align='left' valign=top style='border:solid black 1.0pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 1pt 0in 1pt;'>
+    <b><span style='text-align:center;font-size:8.0pt;color: #004b7b;font-family:Arial,Helvetica,sans-serif;'>Contact person for VPN Role:</span></b></td>
+  <td width='60%' align='left' style='border:solid black 1.0pt;mso-border-left-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:18.5pt'>
+    <span style='text-align:center;font-size:8.0pt;color:windowtext;font-family:Arial,Helvetica,sans-serif;'>" .
+      sanitize($_POST['role_contact'], SQL) . "</span>  </td>
+</tr>
+</table>
+
+<p class=Default align=center style='text-align:center'><b><span style='color:windowtext'>&nbsp;</span></b></p>
+Additional comments: <b>" . $_POST['comment_other'] . "</b>
+<P> Request received from: " . $_SERVER['REMOTE_ADDR'] . "</P>
+
+</body></html>";
+
+#send_email($hd_from, $hd_replyto, $hd_to, $hd_subject, $hd_msg);
+#send_email_html($sec_from, $sec_replyto, $sec_to, $sec_cc, $sec_subject, $sec_msg);
+
+
+?>
+<br />
+<center>
+Your LDAP Group Request has been successfuly submitted. You should receive a confirmation e-mail from the UIS Help Desk
+that a ticket has been created and assigned to the NetID Team. Please track this request using the Peregrine Ticket Number assigned from the Help Desk.
+<br /><br />
+Click <a href="ldap_group_change.html"><b>here</b></a> to submit another request.</center><br />
+
+<?
+	}
+else
+	{ ?>
+<form name="form1" action="sua_request.html" onSubmit="return verify_submit(this)" method="post"> 
+<div id="bodycontent">
+<?php 
+
+	#1st page load - empty request form.  Auto fill based on netID of authentication
+
+	$netid = sanitize($_SERVER['PHP_AUTH_USER'], SQL); 
+	
+	$dn = "ou=people,dc=georgetown,dc=edu";
+	$filter="(|(uid=$netid))";
+	$justthese = array("cn", "telephonenumber", "mail");
+
+	$ds=ldap_connect("directory.georgetown.edu");
+	$sr=ldap_search($ds, $dn, $filter, $justthese);
+	$info = ldap_get_entries($ds, $sr);
+	$fullname = $info[0]['cn'][0];
+	$telephone = $info[0]['telephonenumber'][0];
+	$email = $info[0]['mail'][0];
+	ldap_close($ds);
+	
+?>
+
+<H1 align="center">Georgetown University Sponsored University Associate</H1>
+<H1 align="center">Request Form</H1>
+<TABLE border="0" align="center" cellpadding="0" cellspacing="0"
+class="MsoNormalTable" style='border-collapse:collapse;'>
+	
+ <tr>
+  <td class="UTH"><b>Requester's Name</b></td>
+  <td class="UTH"><b>Requester's Phone#</b></td>
+  <td class="UTH"><b>Requester's Email</b></td>
+  <td class="UTH"><b>Department</b></td>
+  
+ </tr>
+ <tr>
+	
+      <td class="UTD"><INPUT type="text" name="req_name" id="req_name" size="20" value= "<? echo $fullname?>"> </td>
+      <td class="UTD"><INPUT type="text" name="phone" id="phone" size="12" value="<? echo $telephone?> "> </td>
+      <td class="UTD"><INPUT type="text" name="email" id="email" size="24" value="<? echo $email?>">  </td>     
+      <td class="UTD"><?=$dept?><INPUT type="text" name="dept" id="dept" size="15"> </td>    
+ </tr>	
+	
+</TABLE>
+
+<BR>
+<TABLE width=80% align=center><TR><TD>
+<p align="left">
+This form is intended for Sponsored University Associates only. Do not use this form for individuals who are to be paid by Georgetown University. <br /><br />
+If you are uncertain whether an individual qualifies as a Sponsored University Associate, contact Human Resources. For Sponsored University Associates who are freely volunteering their services to Georgetown University (e.g., unpaid volunteers working with a student group), please consult with Human Resources to ensure that the individual is appropriately serving in a volunteer capacity and is not performing services for your department that should otherwise be compensated. 
+<br /><br />
+Sponsored University Associates are required to sign the University Confidentiality Agreement and indicate acceptance of the University policies. Each Associate will receive an e-mail with the necessary information to fulfill this obligation.
+<br /><br /><strong>NOTE: Do not use this form for current employees.</strong>
+</TD></TR></TABLE>
+<br />
+<TABLE align="center" class="MsoNormalTable" border="0"
+cellspacing="0" cellpadding="0" width="60%" style=
+'width:60%;border-collapse:collapse;mso-padding-alt:0in 1.0pt 0in 1.0pt'>
+
+
+<tr><TD colspan=10><strong>Create a new Sponsored University Associate</strong></TD></tr>	
+<TR><TD colspan=10>&nbsp;</TD></TR>
+
+<?
+$months = array (1 => 'January', 'February', 'March', 'April', 'May', 'June','July', 'August', 'September', 'October', 'November', 'December');
+$days = range (1, 31);
+$years = range (2005, 2015);
+
+$time = getdate(time());
+mysql_connect($db_host,$user2,$password2);
+@mysql_select_db($database) or die( "Unable to select database");
+?>
+
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>Effective Start Date</strong></p></div></td>
+<td width="375" class="RightColumn">
+<?
+print "<select name='Field94533_A'>";
+$i = 1;
+foreach ($months as $value) {
+	if ($value == $time[month]) {
+		$selected = "SELECTED";
+	}
+	print "<option value='$i' $selected>$value</option>\n";
+	$selected = "";
+	$i++;
+} print '</select>';
+?>
+	
+<!-- <select name="Field94533_A" size="1">
+<option value="">(none)
+<option value="1">January
+<option value="2">February
+<option value="3">March
+<option value="4">April
+<option value="5">May
+<option value="6">June
+<option value="7">July
+<option value="8">August
+<option value="9">September
+<option value="10">October
+<option value="11">November
+<option value="12">December
+</select> -->
+<input type="text" name="Field94533_B" value="<?=$time[mday]?>" size="2" maxlength="2">
+<b>,</b>
+<input type="text" name="Field94533_C" value="<?=$time[year]?>" size="4" maxlength="4"> 
+</td></tr>
+
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>End Date:</strong></p></div></td>
+<td width="375" class="RightColumn">
+<?
+print "<select name='Field94644_A'>";
+$i = 1;
+foreach ($months as $value) {
+	if ($value == $time[month]) {
+		$selected = "SELECTED";
+	}
+	print "<option value='$i' $selected>$value</option>\n";
+	$selected = "";
+	$i++;
+} print '</select>';
+?>
+<!-- <select name="Field94644_A" size="1">
+<option value="">(none)
+<option value="1">January
+<option value="2">February
+<option value="3">March
+<option value="4">April
+<option value="5">May
+<option value="6">June
+<option value="7">July
+<option value="8">August
+<option value="9">September
+<option value="10">October
+<option value="11">November
+<option value="12">December
+</select> -->
+<input type="text" name="Field94644_B" value="<?=$time[mday]?>" size="2" maxlength="2">
+<b>,</b>
+<input type="text" name="Field94644_C" value="<?=$time[year]+1?>" size="4" maxlength="4"> 
+</td></tr>
+
+
+<TR><TD colspan=10>&nbsp;</TD></TR>
+
+<tr>
+<td colspan="2" class="SectionHeader">&nbsp;
+</td></tr>
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>Associate's First Name</strong></p></div></td>
+<td width="375" class="RightColumn">
+<input type="text" name="Field94552" value="" size="20" maxlength="20"> <font class="RequiredField">*</font>
+<input type="hidden" name="Field94552_Required" value="Please enter the Associate's first name. ">
+</td></tr>
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>Associate's Middle Name</strong></p></div></td>
+<td width="375" class="RightColumn">
+<input type="text" name="Field94553" value="" size="20" maxlength="20"> 
+</td></tr>
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>Associate's Last Name</strong></p></div></td>
+<td width="375" class="RightColumn">
+<input type="text" name="Field94554" value="" size="20" maxlength="20"> <font class="RequiredField">*</font>
+<input type="hidden" name="Field94554_Required" value="Please enter the Associate's last name. ">
+</td></tr>
+<tr>
+<td colspan="2" class="SectionHeader">
+<span class="SectionHeaderText">
+<p></p>
+</span>
+</td>
+</tr>
+<tr>
+<td colspan="2" class="SectionHeader">&nbsp;
+</td></tr>
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>Preferred E-mail</strong></p></div></td>
+<td width="375" class="RightColumn">
+<input type="text" name="Field94555" value="" size="25" maxlength="25"> <font class="RequiredField">*</font>
+<input type="hidden" name="Field94555_Required" value="Please enter a preferred e-mail address. ">
+</td></tr>
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>Date of Birth:</strong></p></div></td>
+<td width="375" class="RightColumn">
+<select name="Field94556_A" size="1">
+<option value="">(none)
+<option value="1">January
+<option value="2">February
+<option value="3">March
+<option value="4">April
+<option value="5">May
+<option value="6">June
+<option value="7">July
+<option value="8">August
+<option value="9">September
+<option value="10">October
+<option value="11">November
+<option value="12">December
+</select>
+<input type="text" name="Field94556_B" value="" size="2" maxlength="2">
+<b>,</b>
+<input type="text" name="Field94556_C" value="" size="4" maxlength="4"> <font class="RequiredField">*</font>
+<input type="hidden" name="Field94556_A_required" value="Please enter the Associate's date of birth. ">
+<input type="hidden" name="Field94556_B_required" value="Please enter the Associate's date of birth. ">
+<input type="hidden" name="Field94556_C_required" value="Please enter the Associate's date of birth. ">
+</td></tr>
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>Gender</strong></p></div></td>
+<td width="375" class="RightColumn">
+<select name="Field94558" size="1" >
+<option value=""> Select one
+</option><option value="Male"> Male
+</option><option value="Female"> Female
+</option><option value="No Response"> No Response</option>
+</select>
+<font class="RequiredField">*</font>
+</td></tr>
+<tr>
+<td colspan="2" class="SectionHeader">
+<span class="SectionHeaderText">
+<p></p>
+</span>
+</td>
+</tr>
+<tr>
+<td colspan="2" class="SectionHeader">&nbsp;
+</td></tr>
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>Please check all that apply:</strong></p>
+<p><strong>
+(Do not use this form for current employees.)</strong></p></div></td>
+<td width="375" class="RightColumn">
+<table cellpadding="0" cellspacing="1" border="0">
+<tr><td valign="top"><input type="checkbox" value="Alumnus/a" name=Field94562_A></td><td valign="top"><div class="Directions"> <strong>Alumnus/a</strong>
+</div></td></tr><tr><td valign="top"><input type="checkbox" value="Current Student" name=Field94562_B></td><td valign="top"><div class="Directions"> <strong>Current Student</strong>
+</div></td></tr><tr><td valign="top"><input type="checkbox" value="Former GU Employee" name=Field94562_C></td><td valign="top"><div class="Directions"> <strong>Former GU Employee</strong>
+</div></td></tr>
+</table>
+</td></tr>
+<tr>
+<td colspan="2" class="SectionHeader">
+<span class="SectionHeaderText">
+<p></p>
+</span>
+</td>
+</tr>
+<tr>
+<td colspan="2" class="SectionHeader">&nbsp;
+</td></tr>
+<tr>
+<td colspan="2" class="SectionHeader">
+<span class="SectionHeaderText">
+<p><strong>If former GU employee, please enter dates employed:</strong></p>
+</span>
+</td>
+</tr>
+<tr>
+<td colspan="2" class="SectionHeader">&nbsp;
+</td></tr>
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>From:</strong></p></div></td>
+<td width="375" class="RightColumn">
+<select name="Field94565_A" size="1">
+<option value="">(none)
+<option value="1">January
+<option value="2">February
+<option value="3">March
+<option value="4">April
+<option value="5">May
+<option value="6">June
+<option value="7">July
+<option value="8">August
+<option value="9">September
+<option value="10">October
+<option value="11">November
+<option value="12">December
+</select>
+<input type="text" name="Field94565_B" value="" size="2" maxlength="2">
+<b>,</b>
+<input type="text" name="Field94565_C" value="" size="4" maxlength="4"> 
+</td></tr>
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>To:</strong></p></div></td>
+<td width="375" class="RightColumn">
+<select name="Field94567_A" size="1">
+<option value="">(none)
+<option value="1">January
+<option value="2">February
+<option value="3">March
+<option value="4">April
+<option value="5">May
+<option value="6">June
+<option value="7">July
+<option value="8">August
+<option value="9">September
+<option value="10">October
+<option value="11">November
+<option value="12">December
+</select>
+<input type="text" name="Field94567_B" value="" size="2" maxlength="2">
+<b>,</b>
+<input type="text" name="Field94567_C" value="" size="4" maxlength="4"> 
+</td></tr>
+<tr>
+<td colspan="2" class="SectionHeader">
+<span class="SectionHeaderText">
+<p></p>
+</span>
+</td>
+</tr>
+<tr>
+<td colspan="2" class="SectionHeader">&nbsp;
+</td></tr>
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>If you checked any of the above items, please enter GU NetID (if known):</strong></p></div></td>
+<td width="375" class="RightColumn">
+<input type="text" name="Field94569" value="" size="15" maxlength="15"> 
+</td></tr>
+<tr>
+<td colspan="2" class="SectionHeader">
+<span class="SectionHeaderText">
+<h3></h3>
+</span>
+</td>
+</tr>
+<tr>
+<td colspan="2" class="SectionHeader">&nbsp;
+</td></tr>
+<tr>
+<td colspan="2" class="SectionHeader">
+<span class="SectionHeaderText">
+<p></p>
+</span>
+</td>
+</tr>
+<tr>
+<td colspan="2" class="SectionHeader">&nbsp;
+</td></tr>
+<tr>
+<td colspan="2" class="SectionHeader">
+<span class="SectionHeaderText">
+<h3 align=center><strong>Home Address</strong></h3>
+</span>
+</td>
+</tr>
+<tr>
+<td colspan="2" class="SectionHeader">&nbsp;
+</td></tr>
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>Street:</strong></p></div></td>
+<td width="375" class="RightColumn">
+<input type="text" name="Field94572" value="" size="30" maxlength="30"> 
+</td></tr>
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>City:</strong></p></div></td>
+<td width="375" class="RightColumn">
+<input type="text" name="Field94573" value="" size="20" maxlength="20"> 
+</td></tr>
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>State:</strong></p></div></td>
+<td width="375" class="RightColumn">
+<select name="Field94575" size="1">
+<option value="">(nothing selected)
+<option value="AL">Alabama
+<option value="AK">Alaska
+<option value="AS">American Samoa
+<option value="AZ">Arizona
+<option value="AR">Arkansas
+<option value="AE">Armed Forces Europe
+<option value="AP">Armed Forces Pacific
+<option value="CA">California
+<option value="CO">Colorado
+<option value="CT">Connecticut
+<option value="DE">Delaware
+<option value="DC">District of Columbia
+<option value="FM">Fed. States of Micronesia
+<option value="FL">Florida
+<option value="GA">Georgia
+<option value="GU">Guam
+<option value="HI">Hawaii
+<option value="ID">Idaho
+<option value="IL">Illinois
+<option value="IN">Indiana
+<option value="IA">Iowa
+<option value="KS">Kansas
+<option value="KY">Kentucky
+<option value="LA">Louisiana
+<option value="ME">Maine
+<option value="MH">Marshall Islands
+<option value="MD">Maryland
+<option value="MA">Massachusetts
+<option value="MI">Michigan
+<option value="MN">Minnesota
+<option value="MS">Mississippi
+<option value="MO">Missouri
+<option value="MT">Montana
+<option value="NE">Nebraska
+<option value="NV">Nevada
+<option value="NH">New Hampshire
+<option value="NJ">New Jersey
+<option value="NM">New Mexico
+<option value="NY">New York
+<option value="NC">North Carolina
+<option value="ND">North Dakota
+<option value="MP">Northern Mariana Islands
+<option value="OH">Ohio
+<option value="OK">Oklahoma
+<option value="OR">Oregon
+<option value="PW">Palau
+<option value="PA">Pennsylvania
+<option value="PR">Puerto Rico
+<option value="RI">Rhode Island
+<option value="SC">South Carolina
+<option value="SD">South Dakota
+<option value="TN">Tennessee
+<option value="TX">Texas
+<option value="UT">Utah
+<option value="VT">Vermont
+<option value="VI">Virgin Islands
+<option value="VA">Virginia
+<option value="WA">Washington
+<option value="WV">West Virginia
+<option value="WI">Wisconsin
+<option value="WY">Wyoming
+</select> 
+</td></tr>
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>Zip Code:</strong></p></div></td>
+<td width="375" class="RightColumn">
+<input type="text" name="Field94576" value="" size="5" maxlength="5">
+</td></tr>
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>Home Phone:</strong></p></div></td>
+<td width="375" class="RightColumn">
+<span class="Directions">(</span>
+<input type="text" name="Field94577_A" value="" size="3" maxlength="3">
+<span class="Directions">)</span>
+<input type="text" name="Field94577_B" value="" size="3" maxlength="3">
+<span class="Directions">-</span>
+<input type="text" name="Field94577_C" value="" size="4" maxlength="4"> 
+</td></tr>
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>Country:</strong></p></div></td>
+<td width="375" class="RightColumn">
+<?
+$query1 = "select * from sua_country";
+
+$result = mysql_query($query1) or die("There was an error processing your request. Please contact UISO");
+$num_rows=mysql_numrows($result);
+
+
+  $i=0;
+  print "<select name='Field94640' size='1' >";
+  print "<option value='United States'>United States</option>";
+  while ($i < $num_rows){
+	$country=mysql_result($result,$i,"country");        
+	print "<option value='$country'>$country</option>";
+	$i++;
+  }
+?>
+</select>
+<!-- <input type="text" name="Field94640" value="" size="20" maxlength="20"> -->
+
+</td></tr>
+<tr>
+<td colspan="2" class="SectionHeader">
+<span class="SectionHeaderText">
+<p></p>
+</span>
+</td>
+</tr>
+<tr>
+<td colspan="2" class="SectionHeader">&nbsp;
+</td></tr>
+<tr>
+<td colspan="2" class="SectionHeader">
+<span class="SectionHeaderText">
+<p></p>
+</span>
+</td>
+</tr>
+<tr>
+<td colspan="2" class="SectionHeader">&nbsp;
+</td></tr>
+<tr>
+<td colspan="2" class="SectionHeader">
+<span class="SectionHeaderText">
+<h3 align=center><strong>GU Work Location</strong></p>
+</span>
+</td>
+</tr>
+<tr>
+<td colspan="2" class="SectionHeader">&nbsp;
+</td></tr>
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>GU Building:</strong></p></div></td>
+<td width="375" class="RightColumn">
+<?
+$query1 = "select * from sua_gu_building";
+
+$result = mysql_query($query1) or die("There was an error processing your request. Please contact UISO");
+$num_rows=mysql_numrows($result);
+
+
+  $i=0;
+  print "<select name='Field94581' size='1' >";
+  print "<option value=''>Choose One</option>";
+  while ($i < $num_rows){
+	$building=mysql_result($result,$i,"guBuilding");        
+	print "<option value='$building'>$building</option>";
+	$i++;
+  }
+?>
+</select>
+<font class="RequiredField">*</font> 
+
+
+<!-- <input type="text" name="Field94581" value="" size="30" maxlength="30"> --> 
+
+</td></tr>
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>Room:</strong></p></div></td>
+<td width="375" class="RightColumn">
+<input type="text" name="Field94582" value="" size="10" maxlength="10"> <font class="RequiredField">*</font>
+<input type="hidden" name="Field94582_Required" value="Please enter the GU building room number in which the Associate will be working. ">
+</td></tr>
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>GU Street Address:</strong></p></div></td>
+<td width="375" class="RightColumn">
+<input type="text" name="Field94583" value="" size="30" maxlength="30"> 
+</td></tr>
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>City:</strong></p></div></td>
+<td width="375" class="RightColumn">
+<input type="text" name="Field94584" value="" size="20" maxlength="20"> 
+</td></tr>
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>State:</strong></p></div></td>
+<td width="375" class="RightColumn">
+<select name="Field94585" size="1">
+<option value="">(nothing selected)
+<option value="AL">Alabama
+<option value="AK">Alaska
+<option value="AS">American Samoa
+<option value="AZ">Arizona
+<option value="AR">Arkansas
+<option value="AE">Armed Forces Europe
+<option value="AP">Armed Forces Pacific
+<option value="CA">California
+<option value="CO">Colorado
+<option value="CT">Connecticut
+<option value="DE">Delaware
+<option value="DC">District of Columbia
+<option value="FM">Fed. States of Micronesia
+<option value="FL">Florida
+<option value="GA">Georgia
+<option value="GU">Guam
+<option value="HI">Hawaii
+<option value="ID">Idaho
+<option value="IL">Illinois
+<option value="IN">Indiana
+<option value="IA">Iowa
+<option value="KS">Kansas
+<option value="KY">Kentucky
+<option value="LA">Louisiana
+<option value="ME">Maine
+<option value="MH">Marshall Islands
+<option value="MD">Maryland
+<option value="MA">Massachusetts
+<option value="MI">Michigan
+<option value="MN">Minnesota
+<option value="MS">Mississippi
+<option value="MO">Missouri
+<option value="MT">Montana
+<option value="NE">Nebraska
+<option value="NV">Nevada
+<option value="NH">New Hampshire
+<option value="NJ">New Jersey
+<option value="NM">New Mexico
+<option value="NY">New York
+<option value="NC">North Carolina
+<option value="ND">North Dakota
+<option value="MP">Northern Mariana Islands
+<option value="OH">Ohio
+<option value="OK">Oklahoma
+<option value="OR">Oregon
+<option value="PW">Palau
+<option value="PA">Pennsylvania
+<option value="PR">Puerto Rico
+<option value="RI">Rhode Island
+<option value="SC">South Carolina
+<option value="SD">South Dakota
+<option value="TN">Tennessee
+<option value="TX">Texas
+<option value="UT">Utah
+<option value="VT">Vermont
+<option value="VI">Virgin Islands
+<option value="VA">Virginia
+<option value="WA">Washington
+<option value="WV">West Virginia
+<option value="WI">Wisconsin
+<option value="WY">Wyoming
+</select> 
+</td></tr>
+<tr>
+	
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>Country:</strong></p></div></td>
+<td width="375" class="RightColumn">
+
+<?
+$query1 = "select * from sua_country";
+
+$result = mysql_query($query1) or die("There was an error processing your request. Please contact UISO");
+$num_rows=mysql_numrows($result);
+
+
+  $i=0;
+  print "<select name='Field94586' size='1' >";
+  print "<option value='United States'>United States</option>";
+  while ($i < $num_rows){
+	$country=mysql_result($result,$i,"country");        
+	print "<option value='$country'>$country</option>";
+	$i++;
+  }
+?>
+</SELECT>
+<!--
+<input type="text" name="Field94586" value="" size="15" maxlength="15">
+-->
+</td></tr>
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>Zip Code:</strong></p></div></td>
+<td width="375" class="RightColumn">
+<input type="text" name="Field94587" value="" size="10" maxlength="10"> 
+</td></tr>
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>GU Phone:</strong></p></div></td>
+<td width="375" class="RightColumn">
+<span class="Directions">(</span>
+<input type="text" name="Field94588_A" value="" size="3" maxlength="3">
+<span class="Directions">)</span>
+<input type="text" name="Field94588_B" value="" size="3" maxlength="3">
+<span class="Directions">-</span>
+<input type="text" name="Field94588_C" value="" size="4" maxlength="4"> 
+</td></tr>
+<tr>
+<td colspan="2" class="SectionHeader">
+<span class="SectionHeaderText"></span><p></p>
+</td>
+</tr>
+<tr>
+<td colspan="2" class="SectionHeader">&nbsp;
+</td></tr>
+<tr>
+<td colspan="2" class="SectionHeader">
+<span class="SectionHeaderText">
+<p></p>
+</span>
+</td>
+</tr>
+<tr>
+<td colspan="2" class="SectionHeader">&nbsp;
+</td></tr>
+<tr>
+<td colspan="2" class="SectionHeader">
+<span class="SectionHeaderText">
+<h3 align=center><strong>Sponsor Information</strong></h3>
+</span>
+</td>
+</tr>
+<tr>
+<td colspan="2" class="SectionHeader">&nbsp;
+</td></tr>
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>Name:</strong></p></div></td>
+<td width="375" class="RightColumn">
+<input type="text" name="Field94592" value="" size="30" maxlength="30"> <font class="RequiredField">*</font>
+<input type="hidden" name="Field94592_Required" value="Please enter the sponsor's name. ">
+</td></tr>
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>Title:</strong></p></div></td>
+<td width="375" class="RightColumn">
+<input type="text" name="Field94593" value="" size="30" maxlength="30"> <font class="RequiredField">*</font>
+<input type="hidden" name="Field94593_Required" value="Please enter the sponsor's title. ">
+</td></tr>
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>E-mail:</strong></p></div></td>
+<td width="375" class="RightColumn">
+<input type="text" name="Field94594" value="" size="25" maxlength="25"> <font class="RequiredField">*</font>
+<input type="hidden" name="Field94594_Required" value="Please enter the sponsor's e-mail address.">
+</td></tr>
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>Department:</strong></p></div></td>
+<td width="375" class="RightColumn">
+
+<?
+$query1 = "select * from sua_dept order by deptCode";
+
+$result = mysql_query($query1) or die("There was an error processing your request. Please contact UISO");
+$num_rows=mysql_numrows($result);
+
+
+  $i=0;
+  print "<select name='Field94612' size='1' >";
+  print "<option value=''> Select one </option>";
+  while ($i < $num_rows){
+	$deptCode=mysql_result($result,$i,"deptCode");        
+	$deptDesc=mysql_result($result,$i,"deptDesc");     
+
+	print "<option value='$deptCode'>$deptCode - $deptDesc</option>";
+	#print "$deptCode and $deptDesc<BR>";
+	$i++;
+
+  }
+
+
+?>
+</select>
+<!--
+<select name="Field94612" size="1" >
+<option value="1"> Select one</option>
+</select>
+-->
+
+<font class="RequiredField">*</font>
+<input type="hidden" name="Field94612_required" value="Please select a department for the sponsor. ">
+</td></tr>
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>Cost Center:</strong></p></div></td>
+<td width="375" class="RightColumn">
+<input type="text" name="Field94596" value="" size="10" maxlength="10"> <font class="RequiredField">*</font>
+<input type="hidden" name="Field94596_Required" value="Please enter the sponsor's cost center. ">
+</td></tr>
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>Phone:</strong></p></div></td>
+<td width="375" class="RightColumn">
+<span class="Directions">(</span>
+<input type="text" name="Field94597_A" value="" size="3" maxlength="3">
+<span class="Directions">)</span>
+<input type="text" name="Field94597_B" value="" size="3" maxlength="3">
+<span class="Directions">-</span>
+<input type="text" name="Field94597_C" value="" size="4" maxlength="4"> <font class="RequiredField">*</font>
+<input type="hidden" name="Field94597_A_required" value="Please enter the sponsor's phone number. ">
+<input type="hidden" name="Field94597_B_required" value="Please enter the sponsor's phone number. ">
+<input type="hidden" name="Field94597_C_required" value="Please enter the sponsor's phone number. ">
+</td></tr>
+<tr>
+<td colspan="2" class="SectionHeader">
+<span class="SectionHeaderText">
+<p></p>
+</span>
+</td>
+</tr>
+<tr>
+<td colspan="2" class="SectionHeader">&nbsp;
+</td></tr>
+<tr>
+<td colspan="2" class="SectionHeader">
+<span class="SectionHeaderText">
+<p></p>
+</span>
+</td>
+</tr>
+<tr>
+<td colspan="2" class="SectionHeader">&nbsp;
+</td></tr>
+<tr>
+<td colspan="2" class="SectionHeader">
+<span class="SectionHeaderText">
+<h3 align=center>Association With GU</h3>
+</span>
+</td>
+</tr>
+<tr>
+<td colspan="2" class="SectionHeader">&nbsp;
+</td></tr>
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>Campus:</strong></p></div></td>
+<td width="375" class="RightColumn">
+<select name="Field94601" size="1" >
+<option value=""> Select one
+</option><option value="Main Campus"> Main Campus
+</option><option value="SFS Qatar"> SFS Qatar
+</option><option value="Law Center"> Law Center
+</option><option value="Medical Center"> Medical Center
+</option><option value="University Services"> University Services</option>
+</select> <font class="RequiredField">*</font>
+<input type="hidden" name="Field94601_required" value="Please select the campus of the Associate. ">
+</td></tr>
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>Role:</strong></p></div></td>
+<td width="375" class="RightColumn">
+
+	
+<select name="Field94602" size="1" >
+<option value="">Select one</option>
+<option value="Contractor">Contractor</option>
+<option value="Vendor Representative">Vendor Representative</option>
+<option value="Volunteer">Volunteer</option>
+<option value="Partner">Partner</option>
+<option value="Conference Attendee">Conference Attendee</option>
+<option value="Friend of the University">Friend of the University</option>
+</select> <font class="RequiredField">*</font>
+<input type="hidden" name="Field94602_required" value="Please select a role for the Associate. ">
+
+
+</td></tr>
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>Associate's Title:</strong></p></div></td>
+<td width="375" class="RightColumn">
+<input type="text" name="Field94603" value="" size="25" maxlength="25"> 
+</td></tr>
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>Associate's Duties:</strong></p></div></td>
+<td width="375" class="RightColumn">
+<textarea name="Field94604" rows="10" cols="25" wrap="virtual"></textarea> 
+</td></tr>
+<tr>
+<td colspan="2" class="SectionHeader">
+<span class="SectionHeaderText">
+<p></p>
+</span>
+</td>
+</tr>
+<tr>
+<td colspan="2" class="SectionHeader">&nbsp;
+</td></tr>
+<tr>
+<td colspan="2" class="SectionHeader">
+<span class="SectionHeaderText">
+<p></p>
+</span>
+</td>
+</tr>
+<tr>
+<td colspan="2" class="SectionHeader">&nbsp;
+</td></tr>
+<tr>
+<td colspan="2" class="SectionHeader">
+<span class="SectionHeaderText">
+<h3 align=center>Identity Verification</h3>
+</span>
+</td>
+</tr>
+<tr>
+<td colspan="2" class="SectionHeader">&nbsp;
+</td></tr>
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>Document Type:</strong></p></div></td>
+<td width="375" class="RightColumn">
+
+<?
+$query1 = "select * from sua_id_documents";
+
+$result = mysql_query($query1) or die("There was an error processing your request. Please contact UISO");
+$num_rows=mysql_numrows($result);
+
+
+  $i=0;
+  print "<select name='Field94608' size='1' >";
+  print "<option value=''>Select one</option>";
+  while ($i < $num_rows){
+	$idDocs=mysql_result($result,$i,"idDocs");        
+	print "<option value='$idDocs'>$idDocs</option>";
+	$i++;
+  }
+?>
+</select>
+<!-- <select name="Field94608" size="1" >
+<option value=""> Select one
+</option><option value="2"> Driver's License
+</option><option value="3"> Passport
+</option><option value="4"> Green Card
+</option><option value="5"> Federal Gov't-Issued Photo ID
+</option><option value="6"> State Gov't-Issued Photo ID
+</option><option value="7"> Local Gov't-Issued Photo ID
+</option><option value="8"> GOCard
+</option><option value="9"> Workplace Photo ID
+</option><option value="10"> University Photo ID (Non-GU)
+</option><option value="11"> Gov't (Non-US)-Issued Photo ID</option>
+</select> <font class="RequiredField">*</font>
+<input type="hidden" name="Field94608_required" value="Please select a valid identification document type. ">
+-->
+</td></tr>
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>Verification Date:</strong></p></div></td>
+<td width="375" class="RightColumn">
+<select name="Field94609_A" size="1">
+<option value="">(none)
+<option value="1">January
+<option value="2">February
+<option value="3">March
+<option value="4">April
+<option value="5">May
+<option value="6">June
+<option value="7">July
+<option value="8">August
+<option value="9">September
+<option value="10">October
+<option value="11">November
+<option value="12">December
+</select>
+<input type="text" name="Field94609_B" value="" size="2" maxlength="2">
+<b>,</b>
+<input type="text" name="Field94609_C" value="" size="4" maxlength="4"> <font class="RequiredField">*</font>
+<input type="hidden" name="Field94609_A_required" value="Please enter a verification date. ">
+<input type="hidden" name="Field94609_B_required" value="Please enter a verification date. ">
+<input type="hidden" name="Field94609_C_required" value="Please enter a verification date. ">
+</td></tr>
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>Name of Person Verifying:</strong></p></div></td>
+<td width="375" class="RightColumn">
+<input type="text" name="Field94610" value="" size="25" maxlength="25"> <font class="RequiredField">*</font>
+<input type="hidden" name="Field94610_Required" value="Please enter the name of the person verifying the identity of the Associate.">
+</td></tr>
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>NetID of Person Verifying:</strong></p></div></td>
+<td width="375" class="RightColumn">
+<input type="text" name="Field94611" value="" size="15" maxlength="15"> <font class="RequiredField">*</font>
+<input type="hidden" name="Field94611_Required" value="Please enter the NetID of the person verifying the identity of the Associate. ">
+</td></tr>
+<tr>
+<td colspan="2" class="SectionHeader">
+<span class="SectionHeaderText">
+<p></p>
+</span>
+</td>
+</tr>
+<tr>
+<td colspan="2" class="SectionHeader">&nbsp;
+</td></tr>
+<tr>
+<td width="125" class="LeftColumn"><div class="SubHeader"><p><strong>Comments:</strong></p></div></td>
+<td width="375" class="RightColumn">
+<textarea name="Field94639" rows="10" cols="20" wrap="virtual"></textarea> 
+</td></tr>
+<tr>
+<td colspan="2" class="SectionHeader">
+<span class="SectionHeaderText">
+<p></p>
+</span>
+</td>
+</tr>
+<tr>
+<td colspan="2" class="SectionHeader">&nbsp;
+</td></tr>
+<tr>
+<td colspan="2" class="SectionHeader">
+<span class="SectionHeaderText">
+<p></p>
+</span>
+</td>
+</tr>
+<tr>
+<td colspan="2" class="SectionHeader">&nbsp;
+</td></tr>
+</TABLE>
+
+<p align="center" >For additional information please contact the NetID Office: <br> netid@georgetown.edu, <br>   x7-2999. <p>
+
+<? mysql_close();?>
+
+<P class="Default" align="center" style='text-align:center'>
+<B><SPAN style='color:windowtext'><INPUT type="submit" name="submit" value="Next"> <INPUT type="reset" name="Clear"></SPAN></B>
+<INPUT type="hidden" name="oncethrough" value="Yes"> <INPUT type=
+"hidden" name="netID" value="<? echo $netid; ?>"></P>
+</LI>
+
+</UL>
+</DIV>
+</FORM>
+</DIV>
+  </form> <? } ?>
+
+	<div id="footer">
+		<div class="left"><a href="http://www.georgetown.edu/">Georgetown University</a> | <a href="http://uis.georgetown.edu/">University Information Services</a></div>
+		<div class="right"><a href="http://security.georgetown.edu/8933.html">Contact Us</a> | <a href="http://search.georgetown.edu/">Search</a> | <a href="http://explore.georgetown.edu/sites/">Site Index</a> | <a href="http://security.georgetown.edu/8934.html">About <abbr title="University Information Security Office">UISO</abbr></a></div>
+		</div>
+	</body>
+</html> 

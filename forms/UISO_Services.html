@@ -1,0 +1,270 @@
+<?php
+
+function ldap_authenticate() {
+    
+    if ($_SERVER['PHP_AUTH_USER'] != "" && $_SERVER['PHP_AUTH_PW'] != "") {
+        $ds=ldap_connect("ldaps://directory.georgetown.edu");
+	ldap_set_option($ds, LDAP_OPT_PROTOCOL_VERSION, 3);
+	$netid=$_SERVER['PHP_AUTH_USER'];
+	$filter="(|(uid=$netid))";
+	$ldap_user = "uid=" . $netid . ",ou=people,dc=georgetown,dc=edu";
+        if (ldap_bind( $ds, $ldap_user, $_SERVER['PHP_AUTH_PW']) ) {
+        	$r = ldap_search( $ds, 'ou=people,dc=georgetown,dc=edu', $filter);
+        	if ($r) {
+            		$result = ldap_get_entries( $ds, $r);
+            		if ($result[0]) {
+                    	return $result[0];
+                }
+            }
+        }
+    }
+    header('WWW-Authenticate: Basic realm="NetID Password Authentication"');
+    header('HTTP/1.0 401 Unauthorized');
+	echo 'Your authentication has failed. Please try again.';
+    return NULL;
+}
+
+if (($result = ldap_authenticate()) == NULL) {
+    exit(0);
+}
+
+?>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>UISO Services</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+		<link rel="stylesheet" type="text/css" href="css/template.css" media="screen" />
+		<script type="text/javascript">
+		function validate_required(field,alerttxt){
+				with (field){
+				 if (value==null||value==""||value==0) {
+					alert(alerttxt);
+					return false;
+					}
+				 else {
+					return true;
+					}
+				}
+			}
+		function validate_email(field,alerttxt) {
+			with (field) {
+				apos=value.indexOf("@")
+				dotpos=value.lastIndexOf(".")
+				if (apos<1||dotpos-apos<2) {
+					alert(alerttxt);
+					return false;
+				} else {
+					return true;
+				}
+			}
+		}
+
+		function verify_submit(thisform) {
+			with (thisform) {
+			
+				if (validate_required(RequestingNetID,"Please enter the requester's NetID.")==false) {
+					RequestingNetID.focus();
+					return false;
+					}
+		
+				if (validate_required(RequestingName,"Please enter the requester's name.")==false) {
+					RequestingName.focus();
+					return false;
+					}
+		
+				if (validate_required(Details,"Please give us some information about your request and review!")==false) {
+					Details.focus();
+					return false;
+					}
+				}
+			}
+	</script>
+	<script type="text/javascript" src="javascript/jquery.js"></script>
+	<script type="text/javascript" src="javascript/popup.js"></script>
+	</head>
+	<body onLoad="initdt(document.form1)">
+
+		<div id="header">
+			<div class="left"><a href="http://www.georgetown.edu/">Georgetown University</a> | <a href="http://uis.georgetown.edu/">University Information Services</a></div>
+			<div class="right"><a href="http://security.georgetown.edu/8933.html">Contact Us</a> | <a href="http://search.georgetown.edu/">Search</a> | <a href="http://explore.georgetown.edu/sites/">Site Index</a> | <a href="http://security.georgetown.edu/8934.html">About <abbr title="University Information Security Office">UISO</abbr></a></div>
+		</div>
+		<div id="title">
+			<h1><a href="http://security.georgetown.edu/">University Information Security Office</a></h1>
+		</div>
+<hr />
+<br />
+<?php
+#include_once("dbConnection.php.inc");
+include_once("sanitize.inc");
+$netid = sanitize($_SERVER['PHP_AUTH_USER'], SQL);
+	
+$dn = "ou=people,dc=georgetown,dc=edu";
+$filter="(uid=$netid)";
+$justthese = array("cn", "telephonenumber", "mail");
+
+$ds=ldap_connect("ldaps://directory.georgetown.edu");
+$ldap_user = "uid=" . $netid . ",ou=people,dc=georgetown,dc=edu";
+if (ldap_bind( $ds, $ldap_user, $_SERVER['PHP_AUTH_PW']) ) {
+	$sr=ldap_search($ds, $dn, $filter, $justthese);
+	$info = ldap_get_entries($ds, $sr);
+	$fullname = $info[0]['cn'][0];
+	$telephone = $info[0]['telephonenumber'][0];
+	$email = $info[0]['mail'][0];
+	ldap_close($ds);
+}
+
+@$thisSubmit = sanitize($_REQUEST['submitEnter'], SQL);
+@$thisSubmitReview = sanitize($_REQUEST['submitReview'], SQL);
+@$thisNetID = sanitize($_REQUEST['RequestingNetID'], SQL);
+@$thisName = sanitize($_REQUEST['RequestingName'], SQL);
+@$thisReview1 = sanitize($_REQUEST['Review1'], SQL);
+@$thisReview2 = sanitize($_REQUEST['Review2'], SQL);
+@$thisReview3 = sanitize($_REQUEST['Review3'], SQL);
+@$thisReview4 = sanitize($_REQUEST['Review4'], SQL);
+@$thisReview5 = sanitize($_REQUEST['Review5'], SQL);
+@$thisReview6 = sanitize($_REQUEST['Review6'], SQL);
+@$thisReview7 = sanitize($_REQUEST['Review7'], SQL);
+@$thisReview8 = sanitize($_REQUEST['Review8'], SQL);
+@$thisReview9 = sanitize($_REQUEST['Review9'], SQL);
+@$thisSensitive = sanitize($_REQUEST['Sensitive'], SQL);
+@$thisReviews = sanitize($_REQUEST['Reviews'], SQL);
+@$thisDetails = sanitize($_REQUEST['Details'], SQL);
+
+$reviews = $thisReview1 . " " .  $thisReview2 . " " . $thisReview3 . " " . $thisReview4 . " " . $thisReview5 . " " . $thisReview6 . " " . $thisReview7 . " " . $thisReview8 . " " . $thisReview9; 
+    
+function send_email($from, $reply, $to, $subject, $message){
+        $headers = 'From: ' . $from . "\n";
+        $headers .= 'Reply-To: ' . $reply . "\n";
+        $headers .= 'Return-Path: ' . $reply . "\n";
+		$headers .= 'X-Mailer: PHP/' . phpversion() . "\n";
+        mail($to,$subject,$message,$headers);
+}
+
+function mysql_insert($sql) {
+
+	include_once("conf/mac_db.conf");
+
+	mysql_connect($db_host,$user,$password);
+	@mysql_select_db($database) or die( "Unable to select database");
+	mysql_query($sql) or die(mysql_error());
+	}
+
+
+if ($thisSubmitReview == "Submit") {
+    print "<div align=center><TABLE width=65% border=3><TR><TD COLSPAN=2>Thank you for submitting a request for UISO Services.";
+    print " A security analyst will respond to your request within the next two business days. ";
+    print "If you require an immediate response, please contact the University Information Security Office at 202-687-3010.";
+    print "</td></tr>";
+    print "</table></div><P></P>";
+
+	$submittedIP = $_SERVER['REMOTE_ADDR'];
+    $sql = "insert into UISOServiceRequest (requestName, requestNetID, requestSensitive, requestReviews, requestDetails, requestDate, requestSubmittedBy, requestSubmittedIP) ";
+    $sql = $sql . "values ('$thisName', '$thisNetID', '$thisSensitive', '$thisReviews', '$thisDetails', now(), '$netid', '$submittedIP' )";
+
+    mysql_insert($sql);
+    
+$hd_to = "uiso-request@georgetown.edu";
+$hd_from = $thisNetID . "@georgetown.edu";
+$email = $thisNetID . "@georgetown.edu";
+$hd_replyto = $hd_from;
+$hd_subject = "Service Request - $thisNetID";
+		
+$hd_msg = "The following service request has been submitted: \n\n";
+
+$hd_msg .= "Requester: $thisName\n";
+$hd_msg .= "Requester NetID $thisNetID\n";
+$hd_msg .= "X-RequestType:$thisReviews\n";
+$hd_msg .= "Requester Sensitive Response: $thisSensitive\n";
+$hd_msg .= "Requester Suppied Details:$thisDetails\n";
+
+$hd_msg .= "Submitted by $netid\n";
+$hd_msg .= "Request Received From: " . $_SERVER['REMOTE_ADDR'] . "\n";    
+
+send_email($hd_from, $hd_replyto, $hd_to, $hd_subject, $hd_msg); 
+
+} 
+
+elseif ($thisSubmit == "Submit") {
+    print "<div align=center><form name='form2' method='POST' action='UISO_Services.html'><TABLE border=3 width=600>";
+    print "<TR><TD COLSPAN=2>Please review your request for completeness.";
+    print " If you require an immediate response, please contact the University Information Security Office at 202-687-3010. </td></tr>";
+    print "<TR><TD>Requester's NetID</td><td>$thisNetID</td></tr>";
+    print "<TR><TD>Requester's Name</TD><TD>$thisName</TD></TR>";
+    print "<TR><TD>Review Type Requested</td><td>$reviews</TD></TR>";
+    print "<TR><TD>Contains PII or Sensitive Information?</td><td>$thisSensitive</TD></TR>";
+    print "<TR><TD colspan=2>Details of Review<BR><br>
+			<textarea name='Details' rows='10' cols=85% wrap='virtual' readonly='readonly'>$thisDetails</textarea>
+			</td></tr>";
+    print "<TR><TD colspan=2 align=right>Please review your request click submit to process.  <input type='button' value ='Back' onClick='history.go(-1)'>  ";
+    print "&nbsp; <input type='submit' name ='submitReview' value ='Submit'></TD></TR>";
+	print "</table></div>";
+    print "<br />";
+?>
+<input name="Reviews" type="hidden" value="<? echo $reviews; ?>">
+<input name="RequestingNetID" type="hidden" value="<? echo $thisNetID; ?>">
+<input name="RequestingName" type="hidden" value="<? echo $thisName; ?>">
+<input name="Sensitive" type="hidden" value="<? echo $thisSensitive; ?>">
+<input name="Details" type="hidden" value="<? echo $thisDetails; ?>">
+</form>
+<?
+} else {
+?>
+<div align=center>
+	<H1>UISO Reviews and Assessments</H1>
+<table width=95%><TR><TD>The University Information Security Office (UISO) provides several services, including information security assessments and reviews of workstations, servers,
+information systems, departmental data protections, and due diligence reviews of vendors and contracts.  To help us provide superior service,
+please use the following form to request a UISO assessment.</TD></TR>
+
+</table>
+
+<form name='form1' method='POST' action='UISO_Services.html' onSubmit="return verify_submit(this)">
+<P>
+<table width=75% BORDER=3>
+<TR>
+<TD><input type="checkbox" value="Vendor Review" name=Review1> <a onMouseOver="popup('The vendor review assesses a vendor\'s ability to protect University data entrusted to their care and verifies their ability to protect data against contract terms or data protection documentation.  This review typically takes about thirty minutes and can be a conference call with the requesting party.')" onMouseOut="kill()"> &nbsp Vendor Review</a></td>
+<TD><input type="checkbox" value="Contract Review" name=Review2><a onMouseOver="popup('The contract review is performed to verify that third party services provide the appropriate amount of information security protections with a focus on how the data is being used and how data is transferred between the University and the vendor.  This review typically takes about one hour.')" onMouseOut="kill()"> &nbsp Contract Review</a></td>
+<TD><input type="checkbox" value="Workstation Review" name=Review3> <a onMouseOver="popup('The workstation review is an of an individual\'s workstation to determine if the machine is compromised or to determine the potential for the workstation to be compromised.  This review is typically perform on key workstations for a department or workstations that access confidential systems in their daily use.  This review typically takes about thirty minutes to complete.')" onMouseOut="kill()">
+&nbsp Workstation Review</a></td>
+</tr>
+<TD><input type="checkbox" value="Departmental Risk Assessment" name=Review4> <a onMouseOver="popup('The departmental risk assessment is an in-depth review of the physical, logical, and administrative review of information system for a specific organization unit.  This review includes identification of information assets, identification of the primary risks and threats to those assets, and provides recommendations for the appropriate levels of information security safeguards.  This review typically requires two to three days.')" onMouseOut="kill()"> &nbsp Departmental Risk Assessment (In-Depth)</a></td>
+<TD><input type="checkbox" value="Application Review" name=Review5> <a onMouseOver="popup('The application risk assessment is an in-depth review of the information security safeguards for a specific application.  This review includes parameter passing validation, SQL/LDAP insertion, cross site scripting, authentication and session management, server misconfiguration, and encryption deployment.  This review typically requires two days and is performed for systems with sensitive data.')" onMouseOut="kill()"> &nbsp Application Risk Assessment (In-Depth)</a></td>
+<TD><input type="checkbox" value="Server Review" name=Review6> <a onMouseOver="popup('The departmental server review provides an assessment to allows individuals in departments to host or maintain servers that allow inbound access from the Internet.  This review focuses on the server administration requirements to allow faculty and staff to manage their own systems that require internet access.  This review typically takes one hour to complete.')" onMouseOut="kill()"> &nbsp Departmental Server Review/Registration</a></td>
+</tr>
+<TD><input type="checkbox" value="Architecture Review" name=Review7> <a onMouseOver="popup('The project architecture security review assess a project or initiative during the planning stages to validate that the conceptual and detailed design meets all University policies, appropriate centralized systems, and information security standards.  This review typically takes under an hour.')" onMouseOut="kill()">&nbsp Project/Information System Architecture Review</a></td>
+<TD><input type="checkbox" value="Implementation Review" name=Review8> <a onMouseOver="popup('The project implementation security review verifies the architectural review with specific focus on operational information security measures to maintain security as the system goes live.  This review typically takes less than one hour.')" onMouseOut="kill()">&nbsp Project/Information System Implementation Review</a></td>
+<TD><input type="checkbox" value="Operational Review" name=Review9> <a onMouseOver="popup('The project operational review is typically scheduled in yearly increments to assess the continued operational security and recommend adjustments as threats change or additional functionality has been added.  This review typically takes less than one hour.')" onMouseOut="kill()">&nbsp Project/Information System Operational Review</a></td>
+</tr></table>
+<table width=75% border=0>
+<TR><TD>&nbsp</TD><TD>&nbsp</TD><TD>&nbsp</TD></TR>
+<TR><td colspan=3 align=center>Requesting NetID &nbsp <input type="text" name="RequestingNetID" value="<? echo $netid; ?>" size="10" maxlength="10"><input type="text" name="RequestingName" value="<? echo $fullname; ?>" size="25" maxlength="50">*</td></TR>
+<TR><td align=center  >Does / Will this system contain<BR> Sensitive or Personally Identifiable Information (PII)*
+</td>
+<td><input type="radio" value="Yes" name=Sensitive>Yes</td>
+<td><input type="radio" value="No" checked name=Sensitive>No</td>
+</table>
+<P>
+<table width=95% border=0>
+<TR><TD>Please describe your request and include any relevant information that would assist the UISO in processing your request.  For example, 
+time contraints or deadlines, additional NetIDs associated to the request, a review request not listed above, and any potential issues that may be
+involved with this request.  A security analyst will contact you to discuss and schedule the review shortly.  If you wish to be contacted by phone,
+please include a number where you can be reached.</TD></TR>
+</table>
+<table width=75% border=0>
+<TR><TD colspan=3>
+<textarea name="Details" rows="10" cols=85% wrap="virtual"></textarea> 
+</TD></TR>
+<TR><TD colspan=3 align=right><input type='submit' name='submitEnter' onSubmit="return verify_submit(this)" value='Submit'></TD></TR>
+</TR>
+</table>
+</form>   
+<p>
+</div>
+<?php } ?>
+	<div id="footer">
+		<div class="left"><a href="http://www.georgetown.edu/">Georgetown University</a> | <a href="http://uis.georgetown.edu/">University Information Services</a></div>
+		<div class="right"><a href="http://security.georgetown.edu/8933.html">Contact Us</a> | <a href="http://search.georgetown.edu/">Search</a> | <a href="http://explore.georgetown.edu/sites/">Site Index</a> | <a href="http://security.georgetown.edu/8934.html">About <abbr title="University Information Security Office">UISO</abbr></a></div>
+		</div>
+	</body>
+</html>

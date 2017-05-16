@@ -1,0 +1,431 @@
+<?php
+
+
+
+function ldap_authenticate() {
+
+    
+
+    if ($_SERVER['PHP_AUTH_USER'] != "" && $_SERVER['PHP_AUTH_PW'] != "") {
+
+        $ds=ldap_connect("ldaps://directory.georgetown.edu");
+
+	ldap_set_option($ds, LDAP_OPT_PROTOCOL_VERSION, 3);
+
+	$netid=$_SERVER['PHP_AUTH_USER'];
+
+	$filter="(|(uid=$netid))";
+
+	 $ldap_user = "uid=" . $netid . ",ou=people,dc=georgetown,dc=edu";
+
+        if (ldap_bind( $ds, $ldap_user, $_SERVER['PHP_AUTH_PW']) ) {
+
+        	$r = ldap_search( $ds, 'ou=people,dc=georgetown,dc=edu', $filter);
+
+        	if ($r) {
+
+            		$result = ldap_get_entries( $ds, $r);
+
+            		if ($result[0]) {
+
+                    	return $result[0];
+
+                }
+
+            }
+
+        }
+
+    }
+
+    header('WWW-Authenticate: Basic realm="NetID Password Authentication"');
+
+    header('HTTP/1.0 401 Unauthorized');
+
+	echo 'Your authentication has failed. Please try again.';
+
+    return NULL;
+
+}
+
+
+
+if (($result = ldap_authenticate()) == NULL) {
+
+    exit(0);
+
+}
+
+
+
+?>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>Two-Factor Authentication at Georgetown University</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+		<link rel="stylesheet" type="text/css" href="https://www1.georgetown.edu/uis/keybridge/_defaultstyles/style_v2.css" media="screen" />
+		<!--[if IE 6]><link rel="stylesheet" type="text/css" href="https://www1.georgetown.edu/uis/keybridge/_defaultstyles/style_v2_ie6adjust.css" media="screen" /><![endif]-->
+		<link rel="stylesheet" type="text/css" href="https://www1.georgetown.edu/security/securid/uis_security_securid.css" media="screen" />
+
+	    <style type="text/css">
+<!--
+.style1 {color: #FF0000}
+-->
+        </style>
+</head>
+		<body id="ksObject88769" class="ksCollection330 col-MX ksPageTemplate320 ksSection11404 ksSite146">
+		<div id="header">
+			<div class="left"><a href="http://www.georgetown.edu/">Georgetown University</a> | <a href="http://uis.georgetown.edu/">University Information Services</a></div>
+			<div class="right"><a href="http://security.georgetown.edu/8933.html">Contact Us</a> | <a href="http://search.georgetown.edu/">Search</a> | <a href="http://explore.georgetown.edu/sites/">Site Index</a> | <a href="http://security.georgetown.edu/8934.html">About <abbr title="University Information Security Office">UISO</abbr></a></div>
+		</div>
+		<div id="title">
+			<h1><a href="http://security.georgetown.edu/">University Information Security Office</a></h1>
+		</div>
+                <div id="navigation">
+                                    <div class="navigation ksChannel ksNavChannel" id="ksChannel768">
+                                    <ul>
+                                        <li class="ksNavSection ksNavLevel1" id="ksSection1021"><a href="http://security.georgetown.edu/students/">Students</a></li>
+                                        <li class="ksNavSection ksNavLevel1" id="ksSection1022"><a href="http://security.georgetown.edu/faculty/">Faculty &amp; Staff</a></li>
+                                        <li class="ksNavSection ksNavLevel1" id="ksSection1023"><a href="http://security.georgetown.edu/netadmins/">Network Administrators</a></li>
+                                    </ul>
+                                    </div>
+
+<div class="ksChannel channelBox rotatingTopic">
+<a href="http://security.georgetown.edu/9440.html"><img src="https://www1.georgetown.edu/security/netid.gif" alt="Your NetID = Your Life @ GU" /></a>
+</div> 
+		</div>
+		<div id="columns">
+			<div id="middle-column">
+			
+	<h1>Two-Factor Request Form</h1> 
+
+                
+				
+				
+<!--				
+<hr />
+<br />  
+-->
+<? if (strlen($_POST['oncethrough']) != 0){ 
+
+include_once("sanitize.inc");
+include_once("conf/fw_db.conf");
+
+function send_email($from, $reply, $to, $subject, $message){
+
+        $headers = 'From: ' . $from . "\n";
+
+        $headers .= 'Reply-To: ' . $reply . "\n";
+
+        $headers .= 'Return-Path: ' . $reply . "\n";
+
+		$headers .= 'X-Mailer: PHP/' . phpversion() . "\n";
+
+        mail($to,$subject,$message,$headers);
+
+}
+
+$r_netid=sanitize($_POST['r_netid'], SQL);
+
+$r_name=sanitize($_POST['r_name'], SQL);
+
+$r_email=sanitize($_POST['r_email'], SQL);
+
+$r_phone=sanitize($_POST['r_phone'], SQL);
+
+$r_dept=sanitize($_POST['r_dept'], SQL);
+
+$auth_netid = $_SERVER['PHP_AUTH_USER'];
+
+
+
+$r_title=sanitize($_POST['r_title'], SQL);
+
+$r_system=sanitize($_POST['r_system'], SQL);
+
+$r_datasteward=sanitize($_POST['r_datasteward'], SQL);
+
+$r_datasteward_email=sanitize($_POST['r_datasteward_email'], SQL);
+
+$r_comments=sanitize($_POST['r_comments'], SQL);
+
+#Send email to the RT to open ticket
+
+$hd_to = "uiso-request@georgetown.edu"; 
+
+$hd_replyto = $r_email;
+
+$hd_from = $r_email;
+
+$hd_subject = "Application/System requesting two-factor authentication:";
+
+
+$hd_msg .= "The following person has submitted a request for RSA SecurID token assignment:\n\n";
+
+$hd_msg .= "NetID: " . $r_netid . "\n";
+
+$hd_msg .= "Name: " . $r_name . "\n";
+
+$hd_msg .= "Title: " . $r_title . "\n";
+
+$hd_msg .= "Department: " . $r_dept . "\n";
+
+$hd_msg .= "Phone: " . $r_phone . "\n";
+
+$hd_msg .= "E-mail: " . $r_email . "\n";
+
+$hd_msg .= "Request Date: " . date("F j, Y, g:i a") . "\n\n";
+
+
+$hd_msg .= "Application/System requesting two-factor authentication:\n\n";
+
+$hd_msg .= "Application/System: " . $r_system . "\n";
+
+$hd_msg .= "Data Steward: " . $r_datasteward . "\n";
+
+$hd_msg .= "Data Steward E-mail: " . $r_datasteward_email . "\n";
+
+$hd_msg .= "Additional comments: " . $r_comments . "\n";
+
+$hd_msg .= "Request received from " . $_SERVER['REMOTE_ADDR'] . " by " . $auth_netid . ".";
+
+send_email($hd_from, $hd_replyto, $hd_to, $hd_subject, $hd_msg);
+?>
+
+
+	<p class=Default align=center style='text-align:center'><b><span style='color:windowtext'>
+	Your request for RSA SecurID Token has been successfuly submitted. You should receive a confirmation e-mail
+	that your request has been received.
+	<br /><br />
+	Click <a href="https://security-uiso.uis.georgetown.edu/forms/request_form.html">here</a> to submit another request.</span></b></p>
+
+	<p>Please authenticate and fill out the informaiton to submit a token request. You will be contacted by the UISO when your token is ready for pick up.</p>
+<?
+
+	}
+
+else
+
+	{ ?>
+
+<form name="request_form" action="request_form.html" method="post">
+<div id="bodycontent">
+
+<?php 
+        include_once("sanitize.inc");
+        $netid = sanitize($_SERVER['PHP_AUTH_USER'], SQL);
+
+        $dn = "ou=people,dc=georgetown,dc=edu";
+        $filter="(|(uid=$netid))";
+        $justthese = array("cn", "telephonenumber", "mail", "ou", "title");
+
+        $ds=ldap_connect("directory.georgetown.edu");
+        $sr=ldap_search($ds, $dn, $filter, $justthese);
+        $info = ldap_get_entries($ds, $sr);
+        $fullname = $info[0]['cn'][0];
+        $telephone = $info[0]['telephonenumber'][0];
+        $email = $info[0]['mail'][0];
+        $dept = $info[0]['ou'][0];
+        $title = $info[0]['title'][0];
+        ldap_close($ds);
+
+?>
+	  
+	<form action="request_form.html">
+	<p>Please fill out this form in its entirety with information about the user requesting two-factor authentication.</p>
+	<table align=left class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 style='border-collapse:collapse;mso-padding-alt:0in 5.4pt 0in 5.4pt'>
+		<tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:19.5pt'>
+  			<td valign=middle bgcolor="#F0F0F0" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 5.4pt 0in 5.4pt;height:19.5pt'>
+    			<b><span style='font-size:8.0pt'>Name</span></b></p></td>
+  			<td valign=middle style='border:solid black 1.0pt;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:19.5pt'>
+  			    <label>
+      				<INPUT TYPE="text" NAME="r_name" ID="r_name" SIZE="55" value="<? echo $fullname; ?>" >
+    			</label>
+  			</td>
+		</tr>
+		<tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:19.5pt'>
+  			<td valign=middle bgcolor="#F0F0F0" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 5.4pt 0in 5.4pt;height:19.5pt'>
+    			<b><span style='font-size:8.0pt'>Title</span></b></p></td>
+  			<td valign=middle style='border:solid black 1.0pt;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:19.5pt'>
+  			    <label>
+      				<INPUT TYPE="text" NAME="r_title" ID="r_title" SIZE="55" value="<? echo $title; ?>">
+    			</label>
+  			</td>
+		</tr>
+		<tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:19.5pt'>
+  			<td valign=middle bgcolor="#F0F0F0" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 5.4pt 0in 5.4pt;height:19.5pt'>
+    			<b><span style='font-size:8.0pt'>Department</span></b></p></td>
+  			<td valign=middle style='border:solid black 1.0pt;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:19.5pt'>
+  			    <label>
+      				<INPUT TYPE="text" NAME="r_dept" ID="r_dept" SIZE="55" value="<? echo $dept; ?>">
+    			</label>
+  			</td>
+		</tr>
+		<tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:19.5pt'>
+  			<td valign=middle bgcolor="#F0F0F0" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 5.4pt 0in 5.4pt;height:19.5pt'>
+    			<b><span style='font-size:8.0pt'>Telephone Number</span></b></p></td>
+  			<td valign=middle style='border:solid black 1.0pt;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:19.5pt'>
+  			    <label>
+      				<INPUT TYPE="text" NAME="r_phone" ID="r_phone" SIZE="55" value="<? echo $telephone; ?>">
+    			</label>
+  			</td>
+		</tr>
+		<tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:19.5pt'>
+  			<td valign=middle bgcolor="#F0F0F0" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 5.4pt 0in 5.4pt;height:19.5pt'>
+    			<b><span style='font-size:8.0pt'>E-Mail Address</span></b></p></td>
+  			<td valign=middle style='border:solid black 1.0pt;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:19.5pt'>
+  			    <label>
+      				<INPUT TYPE="text" NAME="r_email" ID="r_email" SIZE="55" value="<? echo $email; ?>">
+    			</label>
+  			</td>
+		</tr>
+		<tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:19.5pt'>
+  			<td valign=middle bgcolor="#F0F0F0" style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 5.4pt 0in 5.4pt;height:19.5pt'>
+    			<b><span style='font-size:8.0pt'>NetID for token assignment</span></b></p></td>
+ 		
+		<td valign=middle style='border:solid black 1.0pt;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:19.5pt'>
+  			    <label>
+      				<INPUT TYPE="text" NAME="r_netid" ID="r_netid" SIZE="55" value="<? echo $netid; ?>">
+    			</label>
+  			</td>
+		
+		</tr>
+	</table>
+	
+	
+	<p>&nbsp;</p>
+	<p>Please provide information about the system/application to which two-factor authentication is requested:</p>
+	
+	
+	<table align=left class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 style='border-collapse:collapse;mso-padding-alt:0in 5.4pt 0in 5.4pt'>
+		<tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:21.5pt'>
+  			<td valign=middle style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 5.4pt 0in 5.4pt;height:19.5pt'>
+    			<b><span style='font-size:8.0pt'>System/Application requesting two-factor authentication</span></b></p></td>
+  			<td valign=middle style='border:solid black 1.0pt;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:19.5pt'>
+  			    <label>
+      				<INPUT TYPE="text" NAME="r_system" ID="r_system" SIZE="45">
+    			</label>
+  			</td>
+		</tr>
+		<tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:21.5pt'>
+  			<td valign=middle style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 5.4pt 0in 5.4pt;height:19.5pt'>
+    			<b><span style='font-size:8.0pt'>*Data steward authorizing access</span></b></p></td>
+  			<td valign=middle style='border:solid black 1.0pt;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:19.5pt'>
+  			    <label>
+      				<INPUT TYPE="text" NAME="r_datasteward" ID="r_datasteward" SIZE="45"  />
+    			</label>
+  			</td>
+		</tr>
+		<tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:21.5pt'>
+  			<td valign=middle style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 5.4pt 0in 5.4pt;height:19.5pt'>
+    			<b><span style='font-size:8.0pt'>Data steward e-mail</span></b></p></td>
+  			<td valign=middle style='border:solid black 1.0pt;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:19.5pt'>
+  			    <label>
+      				<INPUT TYPE="text" NAME="r_datasteward_email" ID="r_datasteward_email" SIZE="45"  />
+    			</label>
+  			</td>
+		</tr>
+		<tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:21.5pt'>
+  			<td>
+    			<b><span style='font-size:8.0pt'>&nbsp;</span></b></p></td>
+  			<td>&nbsp;
+  			</td>
+		</tr>
+		<tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:21.5pt'>
+  			<td valign=middle style='border:solid black 1.0pt;mso-border-alt:solid black .5pt;background:#D9D9D9;padding:0in 5.4pt 0in 5.4pt;height:19.5pt'>
+    			<b><span style='font-size:8.0pt'>Additional Comments</span></b></p></td>
+  			<td valign=middle style='border:solid black 1.0pt;mso-border-top-alt:solid black .5pt;mso-border-alt:solid black .5pt;padding:0in 5.4pt 0in 5.4pt;height:19.5pt'>
+  			    <label>
+      				<textarea NAME="r_comments" ID="r_comments" cols="43" rows="3" /></textarea>
+    			</label>
+  			</td>
+		</tr>
+	 </table>
+	<p>&nbsp;</p>
+	
+
+<p class=Default align=center style='text-align:center'><b><span style='color:windowtext'>
+
+<input type="submit" name ="submit" value ="Submit">
+
+<input type="reset" name="Clear"></span></b></p>
+
+<input type="hidden" name="oncethrough" value="Yes">
+
+<p>* The Data Steward will be contacted to approve your request.<br />
+	Data Stewards are those members of the University community who have the primary responsibility for particular information. See <a href="http://policies.georgetown.edu/31707.html#stewards">http://policies.georgetown.edu/31707.html#stewards</a></p>
+	
+	</div>
+	</form>
+	<? } ?>
+	
+		
+
+<!-- INSERT CURRENT CHANNEL FOR ANNOUNCEMENTS ARCHIVE, ETC. -->
+			</div>
+			<div id="left-column">
+			</div>
+			<div id="right-column">
+<div class="ksChannel channelBox tasks">
+<ul> 
+<li>
+<a href="http://security.georgetown.edu/securid/8922.html">Report a Security Incident</a>
+</li>
+<li>
+<a href="http://security.georgetown.edu/securid/46115.html">Data Security Task Force</a>
+</li>
+<li>
+<a href="http://security.georgetown.edu/securid/10276.html">Security Resources</a>
+</li>
+<li>
+<a href="http://security.georgetown.edu/securid/44846.html">Policies and Procedures</a>
+</li>
+<li>
+<a href="http://security.georgetown.edu/securid/8923.html">Quick Links</a>
+</li>
+<li>
+<a href="http://security.georgetown.edu/securid/43629.html">Site Comments/Suggestions</a>
+</li>
+<li>
+<a href="http://security.georgetown.edu/securid/8924.html">Top 10 Information Security Tips</a>
+</li>
+</ul>
+</div>
+<div class="ksChannel channelBoxlist ">
+<h3>News & Alerts</h3>
+<ul> 
+<li>
+<a href="http://security.georgetown.edu/securid/88961.html">New social networking site poses dangers to young users.</a> (02/23/2010)
+</li>
+<li>
+<a href="http://security.georgetown.edu/securid/88737.html">Former NSA director joins Georgetown for cybersecurity effort</a> (02/17/2010)
+</li>
+<li>
+<a href="http://security.georgetown.edu/securid/88898.html">Safe travels for you and your data</a> (02/17/2010)
+</li>
+<div align="right"><br><a href="12969.html">More...</a>  </div> </ul>
+</div> 
+<div class="ksChannel channelBox ">
+<h3>Related Resources</h3>
+<ul> 
+<li>
+<a href="http://security.georgetown.edu/securid/47207.html">Information Classification Examples</a>
+</li>
+<li>
+<a href="http://security.georgetown.edu/securid/27829.html">System Patching - When is the right time?</a>
+</li>
+<li>
+<a href="http://security.georgetown.edu/securid/15755.html">The 10 Most Dangerous Things You Can Do Online!</a>
+</li>
+</ul>
+</div>
+			</div>
+		</div>
+		<div id="footer">
+			<div class="left"><a href="http://www.georgetown.edu/">Georgetown University</a> | <a href="http://uis.georgetown.edu/">University Information Services</a></div>
+			<div class="right"><a href="http://security.georgetown.edu/8933.html">Contact Us</a> | <a href="http://search.georgetown.edu/">Search</a> | <a href="http://explore.georgetown.edu/sites/">Site Index</a> | <a href="http://security.georgetown.edu/8934.html">About <abbr title="University Information Security Office">UISO</abbr></a></div>
+		</div>
+	</body>
+</html> 
